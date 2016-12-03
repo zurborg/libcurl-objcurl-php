@@ -1,0 +1,47 @@
+---
+type: library
+name: zurborg/curl-objcurl
+
+description: Object-orientated cURL class for PHP
+homepage: https://github.com/zurborg/libcurl-objcurl-php
+license: MIT
+keywords:
+  - curl
+
+authors:
+  - name: David Zurborg
+    email: zurborg@cpan.org
+    homepage: https://zurborg.github.io/
+
+require:
+  php: '~7'
+  ext-curl: '*'
+  ext-intl: '*'
+  ext-iconv: '*'
+  ext-openssl: '*'
+  sabre/uri: '*'
+  zurborg/log-radis: '*'
+  zurborg/pirate-hooray: '~1.1'
+
+require-dev:
+  phpunit/phpunit: '~5'
+  evert/phpdoc-md: '~0'
+  phpdocumentor/phpdocumentor: '~2'
+  squizlabs/php_codesniffer: '~2'
+
+minimum-stability: dev
+
+autoload:
+  psr-0:
+    Curl: src/
+
+archive:
+  exclude:
+    - '.*'
+    - '*~'
+    - vendor/
+    - docs/
+    - Makefile
+    - composer.lock
+    - composer.phar
+    - composer.yaml

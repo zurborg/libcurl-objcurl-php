@@ -1,0 +1,8 @@
+vendor/
+*.orig
+.*
+*~
+*.err
+*.out
+composer.lock
+composer.phar
