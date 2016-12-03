@@ -20,7 +20,6 @@ require:
   ext-iconv: '*'
   ext-openssl: '*'
   sabre/uri: '*'
-  zurborg/log-radis: '*'
   zurborg/pirate-hooray: '~1.1'
 
 require-dev:
