@@ -46,7 +46,7 @@ class ObjCurlRest extends ObjCurl
     }
 
     /**
-     * Create a new resource
+     * Create a resource
      *
      * Performs a POST request
      *
@@ -98,7 +98,7 @@ class ObjCurlRest extends ObjCurl
     }
 
     /**
-     * Update a new resource
+     * Update a resource
      *
      * Performs a PATCH request
      *

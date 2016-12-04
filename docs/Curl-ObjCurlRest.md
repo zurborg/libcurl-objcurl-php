@@ -66,7 +66,7 @@ Methods
 
     mixed Curl\ObjCurlRest::create(array<mixed,string> $params)
 
-Create a new resource
+Create a resource
 
 Performs a POST request
 
