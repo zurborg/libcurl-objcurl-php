@@ -64,7 +64,7 @@ class ObjCurl
      *
      * @param string $url An URL to connect to
      */
-    public function __construct(string $url = 'http://localhost/')
+    public function __construct($url = 'http://localhost/')
     {
         if (!self::$initialized) {
              self::_initialize();
@@ -112,12 +112,12 @@ class ObjCurl
         return;
     }
 
-    protected function _can(string $feature)
+    protected function _can($feature)
     {
         return Arr::get(self::$features, $feature, null);
     }
 
-    protected function _require(string $feature, $exception)
+    protected function _require($feature, $exception)
     {
         if (!$this->_can($feature)) {
             if ($exception instanceof \Throwable) {
@@ -129,12 +129,12 @@ class ObjCurl
         return;
     }
 
-    protected function _has(string $constant)
+    protected function _has($constant)
     {
         return defined('CURLOPT_'.strtoupper($constant));
     }
 
-    protected function _set(string $key, $val)
+    protected function _set($key, $val)
     {
         if ($this->_has($key)) {
             $this->options[$key] = $val;
@@ -159,7 +159,7 @@ class ObjCurl
      * @param  mixed  $val Value
      * @return self
      */
-    public function sslopt(string $key, $val)
+    public function sslopt($key, $val)
     {
         if ($this->_set("ssl_$key", $val) !== true) {
             throw new \Exception("Unknown cURL SSL option <$key>");
@@ -187,7 +187,7 @@ class ObjCurl
      * @param  string $pass Passphrase if certificate is encrypted
      * @return self
      */
-    public function certificate(string $file, string $type = 'pem', string $pass = null)
+    public function certificate($file, $type = 'pem', $pass = null)
     {
         $this->_set('sslcert', $file);
         $this->_set('sslcerttype', strtoupper($type));
@@ -203,7 +203,7 @@ class ObjCurl
      * @param  string $pass Passphrase if private key is encrypted
      * @return self
      */
-    public function privateKey(string $file, string $type = 'pem', string $pass = null)
+    public function privateKey($file, $type = 'pem', $pass = null)
     {
         $this->_set('sslkey', $file);
         $this->_set('sslkeytype', strtoupper($type));
@@ -217,7 +217,7 @@ class ObjCurl
      * @param  string $url Uniform Resource Location
      * @return self
      */
-    public function url(string $url)
+    public function url($url)
     {
         $this->url = Uri\parse($url);
 
@@ -234,7 +234,7 @@ class ObjCurl
      * @param  string $scheme
      * @return self
      */
-    public function scheme(string $scheme)
+    public function scheme($scheme)
     {
         $this->url['scheme'] = $scheme;
         return $this;
@@ -262,7 +262,7 @@ class ObjCurl
      * @param  string $user
      * @return self
      */
-    public function user(string $user)
+    public function user($user)
     {
         $this->url['user'] = $user;
         return $this;
@@ -274,7 +274,7 @@ class ObjCurl
      * @param  string $host
      * @return self
      */
-    public function host(string $host)
+    public function host($host)
     {
         $this->url['host'] = idn_to_ascii($host);
         return $this;
@@ -286,7 +286,7 @@ class ObjCurl
      * @param  int $port
      * @return self
      */
-    public function port(int $port)
+    public function port($port)
     {
         $this->url['port'] = $port;
         return $this;
@@ -298,7 +298,7 @@ class ObjCurl
      * @param  string $path
      * @return self
      */
-    public function path(string $path)
+    public function path($path)
     {
         $this->url['path'] = $path;
         return $this;
@@ -310,7 +310,7 @@ class ObjCurl
      * @param  string $path
      * @return self
      */
-    public function fragment(string $fragment)
+    public function fragment($fragment)
     {
         $this->url['fragment'] = $fragment;
         return $this;
@@ -324,7 +324,7 @@ class ObjCurl
      * @param  float $seconds
      * @return self
      */
-    public function timeout(float $seconds)
+    public function timeout($seconds)
     {
         if ($this->_has('timeout_ms')) {
             $this->_set('timeout_ms', intval($seconds * 1000));
@@ -341,7 +341,7 @@ class ObjCurl
      * @param  string $value Value of header field
      * @return self
      */
-    public function header(string $key, string $value = null)
+    public function header($key, $value = null)
     {
         $key = self::encodeKey($key);
         if (is_null($value)) {
@@ -360,7 +360,7 @@ class ObjCurl
      * @param  string[] $headers
      * @return self
      */
-    public function headers(array $headers)
+    public function headers($headers)
     {
         foreach ($headers as $key => $value) {
             $this->header($key, $value);
@@ -374,7 +374,7 @@ class ObjCurl
      * @param  string $contentType
      * @return self
      */
-    public function accept(string $contentType)
+    public function accept($contentType)
     {
         $this->header('Accept', $contentType);
         return $this;
@@ -386,7 +386,7 @@ class ObjCurl
      * @param  string $contentType
      * @return self
      */
-    public function contentType(string $contentType)
+    public function contentType($contentType)
     {
         $this->header('ContentType', $contentType);
         return $this;
@@ -399,8 +399,11 @@ class ObjCurl
      * @param  string $value
      * @return self
      */
-    public function query(string $key, string $value = null)
+    public function query($key, $value = null)
     {
+        if (!is_null($value)) {
+            $value = (string) $value;
+        }
         if (!Str::ok($value)) {
             unset($this->query[$key]);
         } else {
@@ -431,7 +434,7 @@ class ObjCurl
      * @param  string $password
      * @return self
      */
-    public function basicAuth(string $username, string $password = null)
+    public function basicAuth($username, $password = null)
     {
         $this->basic_auth_user = $username;
         $this->basic_auth_pass = $password;
@@ -460,7 +463,7 @@ class ObjCurl
      * @param  string       $contentType
      * @return self
      */
-    public function json($data = null, string $contentType = 'application/json')
+    public function json($data = null, $contentType = 'application/json')
     {
         if (!is_null($data)) {
             $json = json_encode($data);
@@ -504,7 +507,7 @@ class ObjCurl
      * @param  string $referer
      * @return self
      */
-    public function referer(string $referer)
+    public function referer($referer)
     {
         $this->referer = $referer;
         return $this;
@@ -517,7 +520,7 @@ class ObjCurl
      * @param  string $value
      * @return self
      */
-    public function cookie(string $key, string $value)
+    public function cookie($key, $value)
     {
         $this->cookies[$key] = $value;
         return $this;
@@ -616,7 +619,7 @@ class ObjCurl
         return this;
     }
 
-    protected function _log($level, string $message, array $context = [])
+    protected function _log($level, $message, array $context = [])
     {
         $context['objcurl_id'] = $this->ID;
 

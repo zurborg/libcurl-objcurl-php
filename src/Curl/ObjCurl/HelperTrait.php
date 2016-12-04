@@ -15,7 +15,7 @@ use \Pirate\Hooray\Arr;
 trait HelperTrait
 {
 
-    private static function decodeKey(string $key)
+    private static function decodeKey($key)
     {
         Str::replace(
             $key,
@@ -41,7 +41,7 @@ trait HelperTrait
         return ucfirst($key);
     }
 
-    private static function encodeKey(string $key)
+    private static function encodeKey($key)
     {
         Str::replace($key, '/_/s', '-');
         Str::replace($key, '/-+/s', '-');

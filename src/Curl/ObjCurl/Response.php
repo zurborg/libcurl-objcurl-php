@@ -35,7 +35,7 @@ class Response
     protected $ID;
 
     /** @internal */
-    public function __construct(\Curl\ObjCurl $objcurl, array $getinfo, array $headers, string $payload = null)
+    public function __construct(\Curl\ObjCurl $objcurl, array $getinfo, array $headers, $payload = null)
     {
         $this->ID = $objcurl->id();
         $this->objcurl = $objcurl;
@@ -98,7 +98,7 @@ class Response
      * @param  int $digits Number of digits to return
      * @return int
      */
-    public function status(int $digits = 3)
+    public function status($digits = 3)
     {
         return intval(substr($this->info('http_code'), 0, $digits));
     }
@@ -110,7 +110,7 @@ class Response
      * @param  mixed  $default
      * @return mixed
      */
-    public function info(string $key, $default = null)
+    public function info($key, $default = null)
     {
         return Arr::get($this->getinfo, $key, $default);
     }
@@ -131,7 +131,7 @@ class Response
      * @param  string $key Fancy name of header field
      * @return string
      */
-    public function header(string $key)
+    public function header($key)
     {
         $key = self::encodeKey($key);
         $key = self::decodeKey($key);
@@ -154,7 +154,7 @@ class Response
      * @param  string $default
      * @return string
      */
-    public function mimeType(string $default = null)
+    public function mimeType($default = null)
     {
         return Arr::get($this->mime_type, 'type', $default);
     }
@@ -165,7 +165,7 @@ class Response
      * @param  string $default
      * @return string
      */
-    public function mimeSubType(string $default = null)
+    public function mimeSubType($default = null)
     {
         return Arr::get($this->mime_type, 'subtype', $default);
     }
@@ -176,7 +176,7 @@ class Response
      * @param  string $default
      * @return string
      */
-    public function mimeTree(string $default = null)
+    public function mimeTree($default = null)
     {
         return Arr::get($this->mime_type, 'tree', $default);
     }
@@ -187,7 +187,7 @@ class Response
      * @param  string $default
      * @return string
      */
-    public function mimeSuffix(string $default = null)
+    public function mimeSuffix($default = null)
     {
         return Arr::get($this->mime_type, 'suffix', $default);
     }
@@ -198,7 +198,7 @@ class Response
      * @param  string $default
      * @return string
      */
-    public function mimeParams(string $default = null)
+    public function mimeParams($default = null)
     {
         return Arr::get($this->mime_type, 'params', $default);
     }
@@ -210,7 +210,7 @@ class Response
      * @param  string $subtype Assert or return false
      * @return string
      */
-    public function contentType(string $type = null, string $subtype = null)
+    public function contentType($type = null, $subtype = null)
     {
         if (!is_null($type) and $this->mimeType() !== $type) {
             return false;
@@ -243,7 +243,7 @@ class Response
      * @param  string $default_type
      * @return mixed
      */
-    public function decode(string $default_type = null)
+    public function decode($default_type = null)
     {
         $type = $this->contentType() or $default_type;
         if (!$type) {

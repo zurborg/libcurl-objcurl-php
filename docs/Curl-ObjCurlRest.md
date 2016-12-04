@@ -346,7 +346,7 @@ Set path of URI
 
 ### fragment
 
-    \Curl\ObjCurl Curl\ObjCurl::fragment(\Curl\string $fragment)
+    \Curl\ObjCurl Curl\ObjCurl::fragment($fragment)
 
 Set path of URI
 
@@ -357,7 +357,7 @@ Set path of URI
 
 
 #### Arguments
-* $fragment **Curl\string**
+* $fragment **mixed**
 
 
 

@@ -14,16 +14,16 @@ authors:
     homepage: https://zurborg.github.io/
 
 require:
-  php: '~7'
+  php: '~5.6'
   ext-curl: '*'
   ext-intl: '*'
   ext-iconv: '*'
   ext-openssl: '*'
   sabre/uri: '*'
-  zurborg/pirate-hooray: '~1.2'
+  zurborg/pirate-hooray: '~0.2.2'
 
 require-dev:
-  phpunit/phpunit: '~5'
+  phpunit/phpunit: '~4'
   evert/phpdoc-md: '~0'
   phpdocumentor/phpdocumentor: '~2'
   squizlabs/php_codesniffer: '~2'
