@@ -58,21 +58,4 @@ trait HelperTrait
         }
         return strtolower($key);
     }
-
-    public static function uuid()
-    {
-        $len = 16;
-        $sec = false;
-        $bin = openssl_random_pseudo_bytes($len, $sec);
-        $bin &= hex2bin('ffffffff'.'ffff'.'0fff'.'bfff'.'ffffffffffff');
-        $bin |= hex2bin('00000000'.'0000'.'4000'.'8000'.'000000000000');
-        $hex = bin2hex($bin);
-        $uuid = [];
-        $i = 0;
-        foreach ([8,4,4,4,12] as $l) {
-            $uuid[] = substr($hex, $i, $l);
-            $i += $l;
-        }
-        return implode('-', $uuid);
-    }
 }

@@ -627,7 +627,7 @@ class ObjCurl
 
     protected function _exec()
     {
-        $this->ID = self::uuid();
+        $this->ID = Str::uuidV4();
 
         $url = Uri\build($this->url);
 

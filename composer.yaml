@@ -20,7 +20,7 @@ require:
   ext-iconv: '*'
   ext-openssl: '*'
   sabre/uri: '*'
-  zurborg/pirate-hooray: '~1.1'
+  zurborg/pirate-hooray: '~1.2'
 
 require-dev:
   phpunit/phpunit: '~5'
