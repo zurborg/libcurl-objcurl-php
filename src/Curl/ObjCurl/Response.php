@@ -1,15 +1,18 @@
 <?php
-
 /**
- * Foo
+ * Object-orientated cURL class for PHP
+ *
+ * @copyright 2016 David Zurborg
+ * @author    David Zurborg <zurborg@cpan.org>
+ * @link      https://github.com/zurborg/libcurl-objcurl-php
+ * @license   https://opensource.org/licenses/MIT The MIT License
  */
-
 namespace Curl\ObjCurl;
 
 use \Pirate\Hooray\Arr;
 
 /**
- * Bar
+ * ObjCurl respsonse class
  */
 class Response
 {

@@ -1,7 +1,7 @@
 Curl\ObjCurl\Response
 ===============
 
-Bar
+ObjCurl respsonse class
 
 
 
