@@ -28,7 +28,7 @@ require-dev:
   phpdocumentor/phpdocumentor: '~2'
   squizlabs/php_codesniffer: '~2'
 
-minimum-stability: dev
+minimum-stability: stable
 
 autoload:
   psr-0:
