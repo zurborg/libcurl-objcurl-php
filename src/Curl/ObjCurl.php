@@ -625,6 +625,16 @@ class ObjCurl
         }
     }
 
+    /**
+     * Unique ID of reques
+     *
+     * @return string UUID
+     */
+    public function id()
+    {
+        return $this->ID;
+    }
+
     protected function _exec()
     {
         $this->ID = Str::uuidV4();

@@ -32,10 +32,12 @@ class Response
     protected $headers = [];
     protected $payload;
     protected $mime_type = [];
+    protected $ID;
 
     /** @internal */
     public function __construct(\Curl\ObjCurl $objcurl, array $getinfo, array $headers, string $payload = null)
     {
+        $this->ID = $objcurl->id();
         $this->objcurl = $objcurl;
         $this->getinfo = $getinfo;
         $this->headers = $headers;
@@ -74,6 +76,16 @@ class Response
                 'params'  => Arr::get($match, 'params'),
             ];
         }
+    }
+
+    /**
+     * Unique ID of request
+     *
+     * @return string UUID
+     */
+    public function id()
+    {
+        return $this->ID;
     }
 
     /**
