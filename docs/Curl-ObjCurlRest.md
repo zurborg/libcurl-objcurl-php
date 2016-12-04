@@ -693,3 +693,17 @@ Set log engine
 * $logger **Psr\Log\AbstractLogger**
 
 
+
+### id
+
+    string Curl\ObjCurl::id()
+
+Unique ID of reques
+
+
+
+* Visibility: **public**
+* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
+
+
+

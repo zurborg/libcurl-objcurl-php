@@ -433,4 +433,15 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame('major/tree.minor', $resp->contentType('major', 'tree.minor'));
 		$this->assertSame(false, $resp->contentType('major', 'bad'));
 	}
+
+	public function test016() {
+		$curl = $this->curl();
+		$resp = $curl->get();
+		$this->assertSame($curl->id(), $resp->id());
+		$uuid = $curl->id();
+		$resp = $curl->get();
+		$this->assertSame($curl->id(), $resp->id());
+		$this->assertNotSame($uuid, $resp->id());
+		$this->assertNotSame($uuid, $curl->id());
+	}
 }

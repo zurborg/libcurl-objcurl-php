@@ -19,6 +19,19 @@ Methods
 -------
 
 
+### id
+
+    string Curl\ObjCurl\Response::id()
+
+Unique ID of request
+
+
+
+* Visibility: **public**
+
+
+
+
 ### status
 
     integer Curl\ObjCurl\Response::status(integer $digits)
