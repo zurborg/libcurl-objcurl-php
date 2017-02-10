@@ -36,7 +36,7 @@ class ObjCurlRest extends ObjCurl
             '/:(\w+)/',
             function ($match) use (&$params, $path) {
                 $key = $match[1];
-                Arr::assert($params, $match[1], "Path $path - key $key not found");
+                Arr::assert($params, $key, "Path $path - parameter $key not present");
                 return urlencode(Arr::consume($params, $key));
             }
         );
