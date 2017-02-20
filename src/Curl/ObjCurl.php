@@ -23,6 +23,11 @@ class ObjCurl
 
     const DEFAULT_TIMEOUT = 30;
 
+    const MIN_CURL_VERSION = 65536 *   7 // major
+                           +   256 *  46 // minor
+                           +     1 *   0 // patch
+    ;
+
     const FEATURES = [
         'ipv6',
         'kerberos4',
@@ -94,6 +99,12 @@ class ObjCurl
         }
 
         self::$version = curl_version();
+
+        $curl_version_string = Arr::get(self::$version, 'version', 0);
+        $curl_version_number = Arr::get(self::$version, 'version_number', 0);
+        if (self::MIN_CURL_VERSION > $curl_version_number) {
+            throw new \Exception(sprintf('Insufficient version of cURL: %d required, but only %d (v%s) is installed', self::MIN_CURL_VERSION, $curl_version_number, $curl_version_string));
+        }
 
         $featuremap = Arr::get(self::$version, 'features', chr(0));
 
