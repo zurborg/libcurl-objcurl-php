@@ -24,7 +24,7 @@ class ObjCurl
     const DEFAULT_TIMEOUT = 30;
 
     const MIN_CURL_VERSION = 65536 *   7 // major
-                           +   256 *  46 // minor
+                           +   256 *  22 // minor
                            +     1 *   0 // patch
     ;
 
