@@ -691,7 +691,13 @@ class ObjCurl
 
         $options = [];
         foreach ($this->options as $key => $val) {
-            $options[constant(strtoupper('curlopt_'.$key))] = $val;
+            $name = strtoupper('curlopt_' . $key);
+            if (defined($name)) {
+                $constant = constant($name);
+                $options[$constant] = $val;
+            } else {
+                throw new \Exception("Unknown cURL option: $key (constant: $name)");
+            }
         }
 
         curl_setopt_array($curl, $options);
