@@ -247,7 +247,7 @@ class Response
     {
         $type = $this->contentType() or $default_type;
         if (!$type) {
-            throw new \Exception("no mime-type");
+            throw new \Exception("No content type in response header found");
         }
 
         switch (true) {
@@ -255,7 +255,7 @@ class Response
                 return $this->_decodeJSON();
         }
 
-        throw new \Exception("unknown mime-type <$type>");
+        throw new \Exception("Unknown content type in response header: $type");
     }
 
     /**
