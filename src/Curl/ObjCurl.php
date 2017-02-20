@@ -112,6 +112,22 @@ class ObjCurl
         return;
     }
 
+    public static function version($param = 'version', $default = null)
+    {
+        if (!self::$initialized) {
+             self::_initialize();
+        }
+        return Arr::get(self::$version, $param, $default);
+    }
+
+    public static function features()
+    {
+        if (!self::$initialized) {
+             self::_initialize();
+        }
+        return self::$features;
+    }
+
     protected function _can(string $feature)
     {
         return Arr::get(self::$features, $feature, null);
