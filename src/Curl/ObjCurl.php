@@ -129,14 +129,24 @@ class ObjCurl
         return;
     }
 
-    protected function _has(string $constant)
+    protected function _hasopt(string $key)
     {
-        return defined('CURLOPT_'.strtoupper($constant));
+        $name = strtoupper('curlopt_' . $key);
+        return defined($name);
     }
 
-    protected function _set(string $key, $val)
+    protected function _hardopt(string $key, $val)
     {
-        if ($this->_has($key)) {
+        if (!$this->_hasopt($key)) {
+            throw new \InvalidArgumentException("Unknown cURL option: $key");
+        }
+        $this->options[$key] = $val;
+        return;
+    }
+
+    protected function _softopt(string $key, $val)
+    {
+        if ($this->_hasopt($key)) {
             $this->options[$key] = $val;
             return true;
         } else {
@@ -147,7 +157,7 @@ class ObjCurl
     protected function _init(array $options)
     {
         foreach ($options as $key => $val) {
-            $this->_set($key, $val);
+            $this->_softopt($key, $val);
         }
         return;
     }
@@ -161,9 +171,7 @@ class ObjCurl
      */
     public function sslopt(string $key, $val)
     {
-        if ($this->_set("ssl_$key", $val) !== true) {
-            throw new \Exception("Unknown cURL SSL option <$key>");
-        }
+        $this->_hardopt("ssl_$key", $val);
         return $this;
     }
 
@@ -175,7 +183,7 @@ class ObjCurl
      */
     public function ciphers(array $list)
     {
-        $this->_set('ssl_cipher_list', implode(':', $list));
+        $this->_hardopt('ssl_cipher_list', implode(':', $list));
         return $this;
     }
 
@@ -189,9 +197,9 @@ class ObjCurl
      */
     public function certificate(string $file, string $type = 'pem', string $pass = null)
     {
-        $this->_set('sslcert', $file);
-        $this->_set('sslcerttype', strtoupper($type));
-        $this->_set('sslcertpasswd', $pass);
+        $this->_hardopt('sslcert', $file);
+        $this->_hardopt('sslcerttype', strtoupper($type));
+        $this->_hardopt('sslcertpasswd', $pass);
         return $this;
     }
 
@@ -205,9 +213,9 @@ class ObjCurl
      */
     public function privateKey(string $file, string $type = 'pem', string $pass = null)
     {
-        $this->_set('sslkey', $file);
-        $this->_set('sslkeytype', strtoupper($type));
-        $this->_set('sslkeypasswd', $pass);
+        $this->_hardopt('sslkey', $file);
+        $this->_hardopt('sslkeytype', strtoupper($type));
+        $this->_hardopt('sslkeypasswd', $pass);
         return $this;
     }
 
@@ -326,10 +334,10 @@ class ObjCurl
      */
     public function timeout(float $seconds)
     {
-        if ($this->_has('timeout_ms')) {
-            $this->_set('timeout_ms', intval($seconds * 1000));
+        if ($this->_hasopt('timeout_ms')) {
+            $this->_softopt('timeout_ms', intval($seconds * 1000));
         } else {
-            $this->_set('timeout', intval($seconds));
+            $this->_softopt('timeout', intval($seconds));
         }
         return $this;
     }
@@ -641,39 +649,40 @@ class ObjCurl
 
         $url = Uri\build($this->url);
 
-        $this->_set('url', $url);
+        $this->_hardopt('url', $url);
 
         if (!is_null($this->basic_auth_user)) {
-            $this->_set('httpauth', CURLAUTH_BASIC);
-            if (is_null($this->basic_auth_pass)) {
-                $this->_set('userpwd', $this->basic_auth_user);
-            } else {
-                $this->_set('userpwd', $this->basic_auth_user . ':' . $this->basic_auth_pass);
+            if ($this->_softopt('httpauth', CURLAUTH_BASIC)) {
+                if (is_null($this->basic_auth_pass)) {
+                    $this->_softopt('userpwd', $this->basic_auth_user);
+                } else {
+                    $this->_softopt('userpwd', $this->basic_auth_user . ':' . $this->basic_auth_pass);
+                }
             }
         }
 
         if ($this->method === 'HEAD') {
-            $this->_set('httpget', true);
-            $this->_set('nobody', true);
+            $this->_hardopt('httpget', true);
+            $this->_hardopt('nobody', true);
         } elseif ($this->method === 'GET') {
-            $this->_set('httpget', true);
+            $this->_hardopt('httpget', true);
         } else {
-            $this->_set('customrequest', $this->method);
+            $this->_hardopt('customrequest', $this->method);
             if (!is_null($this->payload)) {
-                $this->_set('postfields', $this->payload);
+                $this->_hardopt('postfields', $this->payload);
             }
         }
 
         if (!is_null($this->referer)) {
-            $this->_set('referer', $this->referer);
+            $this->_softopt('referer', $this->referer);
         }
 
         if (count($this->cookies)) {
-            $this->_set('cookie', http_build_query($this->cookies, '', '; '));
+            $this->_hardopt('cookie', http_build_query($this->cookies, '', '; '));
         }
 
         if (count($this->headers)) {
-            $this->_set('httpheader', array_values($this->headers));
+            $this->_hardopt('httpheader', array_values($this->headers));
         }
 
         $this->_log('debug', $this->method.' '.$url, [ 'curlopt' => $this->options ]);
