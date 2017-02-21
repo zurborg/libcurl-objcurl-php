@@ -17,12 +17,12 @@ info:
 	@echo $(perl)
 	@$(perl) -v
 
-documentation:
-	-git rm -f --cached docs/*.md
-	$(phpdoc) -d src/ -t docs/ --template=xml --visibility=public >phpdoc.out
+docs:
+	if [ -d $@ ]; then git rm -f $@/*.md; else mkdir $@; fi
+	$(phpdoc) -d src/ -t $@ --template=xml --visibility=public >phpdoc.out
 	$(phpdocmd) docs/structure.xml docs/ > phpdocmd.out
 	git add docs/*.md
-	git clean -xdf docs/
+	git clean -xdf docs
 
 clean:
 	git clean -xdf -e composer.phar -e vendor
@@ -48,4 +48,4 @@ release:
 	git tag -m "Release version $V" -s v$V
 	git push --tags
 
-.PHONY: all info documentation clean test archive release
+.PHONY: all info docs clean test archive release
