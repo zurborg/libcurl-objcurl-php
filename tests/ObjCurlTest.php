@@ -112,6 +112,36 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
             'query' => null,
             'fragment' => 'bar',
         ]);
+        $curl = new ObjCurlDump('http://localhost/');
+        $this->assertEquals($curl->__url(), [
+            'scheme' => 'http',
+            'host'  => 'localhost',
+            'path'  => '/',
+            'port'  => null,
+            'user'  => null,
+            'query' => null,
+            'fragment' => null,
+        ]);
+        $curl->secure();
+        $this->assertEquals($curl->__url(), [
+            'scheme' => 'https',
+            'host'  => 'localhost',
+            'path'  => '/',
+            'port'  => null,
+            'user'  => null,
+            'query' => null,
+            'fragment' => null,
+        ]);
+        $curl->insecure();
+        $this->assertEquals($curl->__url(), [
+            'scheme' => 'http',
+            'host'  => 'localhost',
+            'path'  => '/',
+            'port'  => null,
+            'user'  => null,
+            'query' => null,
+            'fragment' => null,
+        ]);
     }
 
     public function test002() {
@@ -135,19 +165,9 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
             'query' => 'query',
             'fragment' => 'fragment',
         ]);
-        $curl->scheme('SCHEME');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
-            'user'  => 'user',
-            'host'  => 'host',
-            'port'  => 123,
-            'path'  => '/path',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
         $curl->user('USER');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'host',
             'port'  => 123,
@@ -157,7 +177,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->host('HOST');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 123,
@@ -167,7 +187,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->port(456);
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -177,7 +197,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->path('/PATH');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -187,7 +207,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->query('foo', 'bar');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -197,7 +217,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->query('foo');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -207,7 +227,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->queries(['foo'=>123,'bar'=>456]);
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -217,7 +237,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->fragment('FRAGMENT');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,

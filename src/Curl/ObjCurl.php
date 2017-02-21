@@ -35,16 +35,6 @@ class ObjCurl
         'libz',
     ];
 
-    const SECURE_MAP = [
-        'ftp'   => 'ftps',
-        'http'  => 'https',
-        'imap'  => 'imaps',
-        'ldap'  => 'ldaps',
-        'pop3'  => 'pop3s',
-        'smb'   => 'smbs',
-        'smtp'  => 'smtps',
-    ];
-
     use ObjCurl\HelperTrait;
 
     protected static $initialized = false;
@@ -264,28 +254,25 @@ class ObjCurl
     }
 
     /**
-     * Set URI scheme
-     *
-     * @param  string $scheme
-     * @return self
-     */
-    public function scheme(string $scheme)
-    {
-        $this->url['scheme'] = $scheme;
-        return $this;
-    }
-
-    /**
-     * Force secure variant of URI scheme
-     *
-     * Replaces 'http' with 'https' and so on
+     * Use SSL (HTTPS)
      *
      * @return self
      */
     public function secure()
     {
         $this->_require('ssl', 'SSL is not supported by cURL');
-        $this->url['scheme'] = Arr::get(self::SECURE_MAP, $this->url['scheme'], $this->url['scheme']);
+        $this->url['scheme'] = 'https';
+        return $this;
+    }
+
+    /**
+     * Do not use SSL
+     *
+     * @return self
+     */
+    public function insecure()
+    {
+        $this->url['scheme'] = 'http';
         return $this;
     }
 
