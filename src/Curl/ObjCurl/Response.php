@@ -223,11 +223,17 @@ class Response
         return $this->mimeType() . '/' . $this->mimeSubType();
     }
 
-    protected function _decodeJSON()
+    /**
+     * Decode JSON payload
+     *
+     * @param  bool $assoc convert objects to associative arrays
+     * @return mixed
+     */
+    public function decodeJSON(bool $assoc = false)
     {
         $json = $this->payload;
 
-        $data = \json_decode($json);
+        $data = \json_decode($json, $assoc);
 
         if (\json_last_error() !== JSON_ERROR_NONE) {
             $this->objcurl->_log('warning', \json_last_error_msg(), [ 'curl_payload' => $json ]);
@@ -238,7 +244,9 @@ class Response
     }
 
     /**
-     * Decode payload
+     * Decode payload (generic method with auto-detection)
+     *
+     * Currently only JSON is supported.
      *
      * @param  string $default_type
      * @return mixed
@@ -252,7 +260,7 @@ class Response
 
         switch (true) {
             case ($type === 'application/json'):
-                return $this->_decodeJSON();
+                return $this->decodeJSON();
         }
 
         throw new \Exception("Unknown content type in response header: $type");
