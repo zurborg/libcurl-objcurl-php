@@ -113,7 +113,18 @@ class ObjCurl
         return;
     }
 
-    public static function version($param = 'version', $default = null)
+    /**
+     * Get some information about cURL
+     *
+     * ```php
+     * $curl_version = ObjCurl::version();
+     * ```
+     *
+     * @param string $param key param
+     * @param mixed $default fallback value
+     * @return mixed
+     */
+    public static function version(string $param = 'version', $default = null)
     {
         if (!self::$initialized) {
              self::_initialize();
@@ -121,6 +132,13 @@ class ObjCurl
         return Arr::get(self::$version, $param, $default);
     }
 
+    /**
+     * Get a full list of supported cURL features
+     *
+     * The values in the array are either a version for example or just `true`.
+     *
+     * @return array
+     */
     public static function features()
     {
         if (!self::$initialized) {
@@ -182,6 +200,19 @@ class ObjCurl
     /**
      * Set a SSL option
      *
+     * Recognized boolean options:
+     * + `falsestart`
+     * + `enable_alpn`
+     * + `enable_npn`
+     * + `verifypeer`
+     * + `verifystatus`
+     *
+     * Integer options:
+     * + `verifyhost`
+     *
+     * String options:
+     * + `cipher_list` (but see also `ciphers` method below)
+     *
      * @param  string $key Name
      * @param  mixed  $val Value
      * @return self
@@ -194,6 +225,10 @@ class ObjCurl
 
     /**
      * Set SSL ciphers
+     *
+     * ```php
+     * $objcurl->ciphers(['RSA+AES', 'ECDHE+AES'])
+     * ```
      *
      * @param  string[] $list List of ciphers
      * @return self
@@ -279,7 +314,7 @@ class ObjCurl
     /**
      * Set user-part of URI
      *
-     * This the @user part before the hostname of an URI
+     * This is the @user part before the hostname of an URI
      *
      * @param  string $user
      * @return self
@@ -648,7 +683,7 @@ class ObjCurl
     }
 
     /**
-     * Unique ID of reques
+     * Get unique ID of request
      *
      * @return string UUID
      */
