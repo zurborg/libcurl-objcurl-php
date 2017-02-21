@@ -67,8 +67,17 @@ class ObjCurl
  
         $this->url($url);
 
-        $this->timeout(self::DEFAULT_TIMEOUT);
+        $this->reset();
+    }
 
+    /**
+     * Reset every cURL-specific option except URL
+     *
+     * @return self
+     */
+    public function reset()
+    {
+        $this->timeout(self::DEFAULT_TIMEOUT);
         $this->_init([
             'header'          => true,
             'returntransfer'  => true,
@@ -80,6 +89,7 @@ class ObjCurl
             'pipewait'        => true,
             'safe_upload'     => true,
         ]);
+        return $this;
     }
 
     protected static function _initialize()
@@ -191,6 +201,7 @@ class ObjCurl
 
     protected function _init(array $options)
     {
+        $this->options = [];
         foreach ($options as $key => $val) {
             $this->_softopt($key, $val);
         }
