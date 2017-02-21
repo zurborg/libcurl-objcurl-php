@@ -531,8 +531,8 @@ class ObjCurl
     public function json($data = null, string $contentType = 'application/json')
     {
         if (!is_null($data)) {
-            $json = json_encode($data);
-            if (json_last_error() !== JSON_ERROR_NONE) {
+            $json = \json_encode($data);
+            if (\json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception(\json_last_error_msg(), \json_last_error());
             }
             $this->contentType($contentType);
@@ -776,7 +776,7 @@ class ObjCurl
         }
 
         list($header, $payload) = explode("\r\n\r\n", $payload, 2);
-        while (preg_match('/^http\/\d+\.\d+\s+100/i', $header)) {
+        while (Str::match($header, '/^http\/\d+\.\d+\s+100/i')) {
             list($header, $payload) = explode("\r\n\r\n", $payload, 2);
         }
         list($status_line, $header) = explode("\r\n", $header, 2);
