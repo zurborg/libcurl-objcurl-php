@@ -648,7 +648,7 @@ class ObjCurl
     public function logger(\Psr\Log\AbstractLogger $logger)
     {
         $this->logger = $logger;
-        return this;
+        return $this;
     }
 
     protected function _log($level, string $message, array $context = [])
