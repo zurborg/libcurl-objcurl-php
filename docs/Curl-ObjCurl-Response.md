@@ -206,13 +206,29 @@ Condensed MIME content type
 
 
 
+### decodeJSON
+
+    mixed Curl\ObjCurl\Response::decodeJSON(boolean $assoc)
+
+Decode JSON payload
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $assoc **boolean** - &lt;p&gt;convert objects to associative arrays&lt;/p&gt;
+
+
+
 ### decode
 
     mixed Curl\ObjCurl\Response::decode(string $default_type)
 
-Decode payload
+Decode payload (generic method with auto-detection)
 
-
+Currently only JSON is supported.
 
 * Visibility: **public**
 
