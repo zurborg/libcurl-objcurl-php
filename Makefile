@@ -36,9 +36,12 @@ composer.json: composer.yaml
 	-rm composer.lock
 	git add $@
 
-test:
+test: lint
 	$(phpcs) --warning-severity=0 --standard=PSR2 src
 	$(phpunit) --verbose tests/
+
+lint:
+	for file in `find src tests -name '*.php' | sort`; do $(php) -l $$file; done
 
 archive: | clean composer.json
 	$(composer) archive
