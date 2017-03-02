@@ -42,7 +42,7 @@ class Response
         $this->getinfo = $getinfo;
         $this->headers = $headers;
         $this->payload = $payload;
-        $type = strtolower(trim($this->header('ContentType')));
+        $type = strtolower(trim($this->header('Content-Type')));
         if (preg_match(
             '/^
                 (?<type>
@@ -128,13 +128,12 @@ class Response
     /**
      * HTTP response header
      *
-     * @param  string $key Fancy name of header field
+     * @param  string $key Name of header field
      * @return string
      */
     public function header(string $key)
     {
-        $key = self::encodeKey($key);
-        $key = self::decodeKey($key);
+        $key = strtolower($key);
         return Arr::get($this->headers, $key, null);
     }
 
@@ -275,7 +274,7 @@ class Response
     {
         $msg = '';
         foreach ($this->headers as $key => $val) {
-            $msg .= self::encodeKey($key) . self::COL . self::SP . $val . self::EOL;
+            $msg .= $key . self::COL . self::SP . $val . self::EOL;
         }
         $msg .= self::EOL;
         return $msg.$this->payload;

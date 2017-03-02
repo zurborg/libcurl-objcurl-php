@@ -405,13 +405,13 @@ class ObjCurl
     /**
      * Set a single header field
      *
-     * @param  string $key   Fancy name of header field
+     * @param  string $key   Name of header field
      * @param  string $value Value of header field
      * @return self
      */
     public function header(string $key, string $value = null)
     {
-        $key = self::encodeKey($key);
+        $key = strtolower($key);
         if (is_null($value)) {
             unset($this->headers[$key]);
         } else {
@@ -456,7 +456,7 @@ class ObjCurl
      */
     public function contentType(string $contentType)
     {
-        $this->header('ContentType', $contentType);
+        $this->header('Content-Type', $contentType);
         return $this;
     }
 
@@ -809,11 +809,11 @@ class ObjCurl
 
         $headers = iconv_mime_decode_headers($header, ICONV_MIME_DECODE_CONTINUE_ON_ERROR);
 
-        $fancy_headers = [];
+        $lower_headers = [];
         foreach ($headers as $key => $val) {
-            $fancy_headers[self::decodeKey($key)] = $val;
+            $lower_headers[strtolower($key)] = $val;
         }
-        $headers = $fancy_headers;
+        $headers = $lower_headers;
 
         return new ObjCurl\Response($this, $curl_getinfo, $headers, $payload);
     }
