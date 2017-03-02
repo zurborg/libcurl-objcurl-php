@@ -9,7 +9,7 @@ yaml2json=$(perl) -MJSON -MYAML -eprint -e'encode_json(YAML::Load(join""=><>))'
 getversion=$(perl) -MYAML -eprint -e'YAML::Load(join""=><>)->{version}'
 V=`$(getversion) < composer.yaml`
 
-all: | vendor test documentation
+all: | vendor test docs
 
 info:
 	@echo $(php)
@@ -41,7 +41,7 @@ test: lint
 	$(phpunit) --verbose tests/
 
 lint:
-	for file in `find src tests -name '*.php' | sort`; do $(php) -l $$file; done
+	for file in `find src tests -name '*.php' | sort`; do $(php) -l $$file || exit 1; done
 
 archive: | clean composer.json
 	$(composer) archive
