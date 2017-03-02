@@ -267,18 +267,18 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
 
         $curl->header('FOO', 123);
         $this->assertSame($curl->__headers(), [
-            'f-o-o' => 'f-o-o: 123',
+            'foo' => 'foo: 123',
         ]);
 
-        $curl->header('-bar', 456);
+        $curl->header('x-bar', 456);
         $this->assertSame($curl->__headers(), [
-            'f-o-o' => 'f-o-o: 123',
+            'foo'   => 'foo: 123',
             'x-bar' => 'x-bar: 456',
         ]);
 
         $curl->headers(['abc'=>'def','ghi'=>'jkl']);
         $this->assertSame($curl->__headers(), [
-            'f-o-o' => 'f-o-o: 123',
+            'foo'   => 'foo: 123',
             'x-bar' => 'x-bar: 456',
             'abc'   => 'abc: def',
             'ghi'   => 'ghi: jkl',
@@ -372,7 +372,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
 
     public function test008() {
         $curl = $this->curl();
-        $curl->header('XFooBar', 123456);
+        $curl->header('X-Foo-Bar', 123456);
         $resp = $curl->get();
         $this->assertSame(200, $resp->status(), "HTTP Status");
         $data = $this->interpret($resp);
