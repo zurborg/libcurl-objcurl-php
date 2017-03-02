@@ -92,7 +92,7 @@ HTTP response header
 
 
 #### Arguments
-* $key **string** - &lt;p&gt;Fancy name of header field&lt;/p&gt;
+* $key **string** - &lt;p&gt;Name of header field&lt;/p&gt;
 
 
 

@@ -69,6 +69,19 @@ Instanciates a new object
 
 
 
+### reset
+
+    \Curl\ObjCurl Curl\ObjCurl::reset()
+
+Reset every cURL-specific option except URL
+
+
+
+* Visibility: **public**
+
+
+
+
 ### version
 
     mixed Curl\ObjCurl::version(string $param, mixed $default)
@@ -335,7 +348,7 @@ Set a single header field
 
 
 #### Arguments
-* $key **string** - &lt;p&gt;Fancy name of header field&lt;/p&gt;
+* $key **string** - &lt;p&gt;Name of header field&lt;/p&gt;
 * $value **string** - &lt;p&gt;Value of header field&lt;/p&gt;
 
 
