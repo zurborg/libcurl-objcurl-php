@@ -531,7 +531,7 @@ class ObjCurl
     public function json($data = null, string $contentType = 'application/json')
     {
         if (!is_null($data)) {
-            $json = \json_encode($data);
+            $json = \json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES);
             if (\json_last_error() !== JSON_ERROR_NONE) {
                 throw new \RuntimeException(\json_last_error_msg(), \json_last_error());
             }
