@@ -8,7 +8,7 @@ Bar
 
 * Class name: Exception
 * Namespace: Curl\ObjCurl
-* Parent class: Exception
+* Parent class: RuntimeException
 
 
 

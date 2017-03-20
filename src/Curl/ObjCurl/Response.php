@@ -236,7 +236,7 @@ class Response
 
         if (\json_last_error() !== JSON_ERROR_NONE) {
             $this->objcurl->_log('warning', \json_last_error_msg(), [ 'curl_payload' => $json ]);
-            throw new \Exception(\json_last_error_msg(), \json_last_error());
+            throw new \RuntimeException(\json_last_error_msg(), \json_last_error());
         }
 
         return $data;
@@ -254,7 +254,7 @@ class Response
     {
         $type = $this->contentType() or $default_type;
         if (!$type) {
-            throw new \Exception("No content type in response header found");
+            throw new \RuntimeException("No content type in response header found");
         }
 
         switch (true) {
@@ -262,7 +262,7 @@ class Response
                 return $this->decodeJSON();
         }
 
-        throw new \Exception("Unknown content type in response header: $type");
+        throw new \RuntimeException("Unknown content type in response header: $type");
     }
 
     /**

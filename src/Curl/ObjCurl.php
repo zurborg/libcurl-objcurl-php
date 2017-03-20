@@ -533,7 +533,7 @@ class ObjCurl
         if (!is_null($data)) {
             $json = \json_encode($data);
             if (\json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception(\json_last_error_msg(), \json_last_error());
+                throw new \RuntimeException(\json_last_error_msg(), \json_last_error());
             }
             $this->contentType($contentType);
             $this->payload($json);
@@ -756,7 +756,7 @@ class ObjCurl
                 $constant = constant($name);
                 $options[$constant] = $val;
             } else {
-                throw new \Exception("Unknown cURL option: $key (constant: $name)");
+                throw new \InvalidArgumentException("Unknown cURL option: $key (constant: $name)");
             }
         }
 

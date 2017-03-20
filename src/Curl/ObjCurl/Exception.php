@@ -9,7 +9,7 @@ namespace Curl\ObjCurl;
 /**
  * Bar
  */
-class Exception extends \Exception
+class Exception extends \RuntimeException
 {
 
 }
