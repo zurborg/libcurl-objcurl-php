@@ -10,6 +10,7 @@
 namespace Curl\ObjCurl;
 
 use \Pirate\Hooray\Arr;
+use \Sabre\Uri;
 
 /**
  * ObjCurl respsonse class
@@ -123,6 +124,22 @@ class Response
     public function infos()
     {
         return $this->getinfo;
+    }
+
+    /**
+     * Return request URI
+     *
+     * @param string $part `scheme` or `host` or `path` or `port` or `user` or `query` or `fragment`
+     * @return mixed array or scalar
+     */
+    public function url(string $part = null)
+    {
+        $uri = Uri\parse(Arr::get($this->getinfo, 'url'));
+        if (is_null($part)) {
+            return $uri;
+        } else {
+            return Arr::get($uri, $part);
+        }
     }
 
     /**
