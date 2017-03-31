@@ -12,6 +12,7 @@ namespace Curl;
 use \Sabre\Uri;
 use \Pirate\Hooray\Arr;
 use \Pirate\Hooray\Str;
+use \Wrap\JSON;
 
 /**
  * ObjCurl is a chainable class for creating reuseable objects
@@ -526,15 +527,13 @@ class ObjCurl
      *
      * @param  array|object $data
      * @param  string       $contentType
+     * @throw  \Wrap\JSON\EncodeException
      * @return self
      */
     public function json($data = null, string $contentType = 'application/json')
     {
         if (!is_null($data)) {
-            $json = \json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES);
-            if (\json_last_error() !== JSON_ERROR_NONE) {
-                throw new \RuntimeException(\json_last_error_msg(), \json_last_error());
-            }
+            $json = JSON::encode($data);
             $this->contentType($contentType);
             $this->payload($json);
         }

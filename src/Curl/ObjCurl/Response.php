@@ -11,6 +11,7 @@ namespace Curl\ObjCurl;
 
 use \Pirate\Hooray\Arr;
 use \Sabre\Uri;
+use \Wrap\JSON;
 
 /**
  * ObjCurl respsonse class
@@ -243,20 +244,18 @@ class Response
      * Decode JSON payload
      *
      * @param  bool $assoc convert objects to associative arrays
+     * @throw  \Wrap\JSON\DecodeException
      * @return mixed
      */
     public function decodeJSON(bool $assoc = false)
     {
         $json = $this->payload;
 
-        $data = \json_decode($json, $assoc);
-
-        if (\json_last_error() !== JSON_ERROR_NONE) {
-            $this->objcurl->_log('warning', \json_last_error_msg(), [ 'curl_payload' => $json ]);
-            throw new \RuntimeException(\json_last_error_msg(), \json_last_error());
+        if ($assoc) {
+            return JSON::decodeArray($json);
+        } else {
+            return JSON::decodeObject($json);
         }
-
-        return $data;
     }
 
     /**
