@@ -3,6 +3,7 @@
 namespace Curl;
 
 use \Pirate\Hooray\Arr;
+use \Wrap\JSON;
 
 class ObjCurlDump extends ObjCurl {
     public function __url() {
@@ -38,7 +39,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
 
     private function interpret($resp)
     {
-        return (array) json_decode($resp->payload(), true);
+        return JSON::decodeArray($resp->payload());
     }
 
     public function test001() {
