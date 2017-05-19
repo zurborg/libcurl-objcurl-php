@@ -470,10 +470,12 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
     public function test017() {
         $curl = $this->curl();
         $curl->path('/error.php');
-        $curl->query('code', '444');
+        $curl->query('code', 444);
         $resp = $curl->get();
-        if ($resp->status() !== 444) {
-            die("\n$resp\n");
+        if ($resp->status() === 500) {
+            $this->assertTrue(true);
+        } else {
+            $this->assertSame(444, $resp->status());
         }
     }
 
