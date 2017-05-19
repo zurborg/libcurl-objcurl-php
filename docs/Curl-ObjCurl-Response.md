@@ -269,7 +269,7 @@ Returns HTTP response message
 
 ### raise
 
-    mixed Curl\ObjCurl\Response::raise(string $reason)
+    mixed Curl\ObjCurl\Response::raise(string $reason, integer $code)
 
 Throws this response as an runtime exception
 
@@ -280,5 +280,6 @@ Throws this response as an runtime exception
 
 #### Arguments
 * $reason **string** - &lt;p&gt;a well-picked reason why we should throw an exception&lt;/p&gt;
+* $code **integer**
 
 
