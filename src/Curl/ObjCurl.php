@@ -9,10 +9,12 @@
  */
 namespace Curl;
 
-use \Sabre\Uri;
-use \Pirate\Hooray\Arr;
-use \Pirate\Hooray\Str;
-use \Wrap\JSON;
+use Psr\Log\AbstractLogger;
+use Sabre\Uri;
+use Pirate\Hooray\Arr;
+use Pirate\Hooray\Str;
+use Wrap\JSON;
+use Psr\Log\AbstractLogger;
 
 /**
  * ObjCurl is a chainable class for creating reuseable objects
@@ -677,7 +679,7 @@ class ObjCurl
      * @param  \Psr\Log\AbstractLogger $logger
      * @return self
      */
-    public function logger(\Psr\Log\AbstractLogger $logger)
+    public function logger(AbstractLogger $logger)
     {
         $this->logger = $logger;
         return $this;
@@ -687,7 +689,7 @@ class ObjCurl
     {
         $context['objcurl_id'] = $this->ID;
 
-        if ($this->logger instanceof \Psr\Log\AbstractLogger) {
+        if ($this->logger instanceof AbstractLogger) {
             $this->logger->log($level, $message, $context);
         }
     }

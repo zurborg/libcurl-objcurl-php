@@ -9,9 +9,9 @@
  */
 namespace Curl;
 
-use \Sabre\Uri;
-use \Pirate\Hooray\Arr;
-use \Pirate\Hooray\Str;
+use Sabre\Uri;
+use Pirate\Hooray\Arr;
+use Pirate\Hooray\Str;
 
 /**
  * Sub-class of ObjCurl with RESTful helper methods

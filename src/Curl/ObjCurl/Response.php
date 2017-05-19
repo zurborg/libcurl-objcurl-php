@@ -9,9 +9,9 @@
  */
 namespace Curl\ObjCurl;
 
-use \Pirate\Hooray\Arr;
-use \Sabre\Uri;
-use \Wrap\JSON;
+use Pirate\Hooray\Arr;
+use Sabre\Uri;
+use Wrap\JSON;
 
 /**
  * ObjCurl respsonse class

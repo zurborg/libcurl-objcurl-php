@@ -2,8 +2,9 @@
 
 namespace Curl;
 
-use \Pirate\Hooray\Arr;
-use \Wrap\JSON;
+use Pirate\Hooray\Arr;
+use Wrap\JSON;
+use PHPUnit_Framework_TestCase;
 
 class ObjCurlDump extends ObjCurl {
     public function __url() {
@@ -20,7 +21,7 @@ class ObjCurlDump extends ObjCurl {
     }
 }
 
-class ObjCurlTest extends \PHPUnit_Framework_TestCase
+class ObjCurlTest extends PHPUnit_Framework_TestCase
 {
     private function arrsert(array $array, $key, $val) {
         return $this->assertSame($val, Arr::get($array, $key));
