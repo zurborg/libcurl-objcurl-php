@@ -466,4 +466,15 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertNotSame($uuid, $resp->id());
         $this->assertNotSame($uuid, $curl->id());
     }
+
+    /**
+     * @expectedException Curl\ObjCurl\Exception
+     * @expectedExceptionCode 6
+     * @expectedExceptionMessage Could not resolve host: nonexistent.nodomain
+     */
+    public function test018() {
+        $curl = $this->curl();
+        $curl->host('nonexistent.nodomain');
+        $curl->get();
+    }
 }
