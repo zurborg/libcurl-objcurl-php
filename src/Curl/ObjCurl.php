@@ -14,7 +14,6 @@ use Sabre\Uri;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 use Wrap\JSON;
-use Psr\Log\AbstractLogger;
 
 /**
  * ObjCurl is a chainable class for creating reuseable objects
