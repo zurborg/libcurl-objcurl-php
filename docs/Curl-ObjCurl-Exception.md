@@ -14,6 +14,19 @@ Bar
 
 
 
+Properties
+----------
+
+
+### $Response
+
+    public mixed $Response
+
+
+
+
+
+* Visibility: **public**
 
 
 

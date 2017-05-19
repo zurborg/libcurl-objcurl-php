@@ -80,6 +80,22 @@ cURL getinfo
 
 
 
+### url
+
+    mixed Curl\ObjCurl\Response::url(string $part)
+
+Return request URI
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $part **string** - &lt;p&gt;&lt;code&gt;scheme&lt;/code&gt; or &lt;code&gt;host&lt;/code&gt; or &lt;code&gt;path&lt;/code&gt; or &lt;code&gt;port&lt;/code&gt; or &lt;code&gt;user&lt;/code&gt; or &lt;code&gt;query&lt;/code&gt; or &lt;code&gt;fragment&lt;/code&gt;&lt;/p&gt;
+
+
+
 ### header
 
     string Curl\ObjCurl\Response::header(string $key)
@@ -248,5 +264,21 @@ Returns HTTP response message
 
 * Visibility: **public**
 
+
+
+
+### raise
+
+    mixed Curl\ObjCurl\Response::raise(string $reason)
+
+Throws this response as an runtime exception
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $reason **string** - &lt;p&gt;a well-picked reason why we should throw an exception&lt;/p&gt;
 
 
