@@ -485,4 +485,15 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $curl->host('nonexistent.nodomain');
         $curl->get();
     }
+
+    /**
+     * @expectedException Curl\ObjCurl\Exception
+     * @expectedExceptionCode 123
+     * @expectedExceptionMessage meh
+     */
+    public function test019() {
+        $curl = $this->curl();
+        $resp = $curl->get();
+        $resp->raise('meh', 123);
+    }
 }

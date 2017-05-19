@@ -11,5 +11,5 @@ namespace Curl\ObjCurl;
  */
 class Exception extends \RuntimeException
 {
-
+    public $Response;
 }

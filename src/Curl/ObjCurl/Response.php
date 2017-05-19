@@ -295,4 +295,18 @@ class Response
         $msg .= self::EOL;
         return $msg.$this->payload;
     }
+
+    /**
+     * Throws this response as an runtime exception
+     *
+     * @param string $reason a well-picked reason why we should throw an exception
+     * @param int $code
+     * @throws \Curl|ObjCurl|Exception
+     */
+    public function raise(string $reason, int $code = 0)
+    {
+        $e = new Exception($reason, $code);
+        $e->Response = $this;
+        throw $e;
+    }
 }
