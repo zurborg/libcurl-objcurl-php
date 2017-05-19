@@ -467,6 +467,14 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertNotSame($uuid, $curl->id());
     }
 
+    public function test017() {
+        $curl = $this->curl();
+        $curl->path('/error.php');
+        $curl->query('code', '444');
+        $resp = $curl->get();
+        $this->assertSame(444, $resp->status());
+    }
+
     /**
      * @expectedException Curl\ObjCurl\Exception
      * @expectedExceptionCode 6
