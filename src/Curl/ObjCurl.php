@@ -705,6 +705,9 @@ class ObjCurl
 
     protected function _exec()
     {
+        $T = [];
+        $T[0] = microtime(true);
+
         $this->ID = Str::uuidV4();
 
         $url = Uri\build($this->url);
@@ -747,6 +750,8 @@ class ObjCurl
 
         $this->_log('debug', $this->method.' '.$url, [ 'curlopt' => $this->options ]);
 
+        $T['init'] = microtime(true);
+
         $curl = curl_init();
 
         $options = [];
@@ -762,7 +767,12 @@ class ObjCurl
 
         curl_setopt_array($curl, $options);
         curl_setopt($curl, CURLINFO_HEADER_OUT, true);
+
+        $T['setopt'] = microtime(true);
+
         $payload = curl_exec($curl);
+
+        $T['exec'] = microtime(true);
 
         $curl_error_code        = curl_errno($curl);
         $curl_error_message     = curl_error($curl);
@@ -804,6 +814,7 @@ class ObjCurl
 
         $this->_log($level, $status_line, [
             'curl'                  => $curl_getinfo,
+            'curl_times'            => $T,
             'curl_respsonse_header' => $header,
         ]);
 
@@ -814,6 +825,10 @@ class ObjCurl
             $lower_headers[strtolower($key)] = $val;
         }
         $headers = $lower_headers;
+
+        $T['cleanup'] = microtime(true);
+
+        $curl_getinfo['times'] = $T;
 
         return new ObjCurl\Response($this, $curl_getinfo, $headers, $payload);
     }

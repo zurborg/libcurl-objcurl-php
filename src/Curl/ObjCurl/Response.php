@@ -128,6 +128,24 @@ class Response
     }
 
     /**
+     * Return performance data
+     *
+     * @return float[] execution time of some steps (init, setopt, exec, cleanup)
+     */
+    public function times()
+    {
+        $times = $this->getinfo['times'];
+        $T0 = $times[0];
+        $diffs = [];
+        foreach ($times as $key => $time) {
+            $diffs[$key] = $time - $T0;
+            $T0 = $time;
+        }
+        unset($diffs[0]);
+        return $diffs;
+    }
+
+    /**
      * Return request URI
      *
      * @param string $part `scheme` or `host` or `path` or `port` or `user` or `query` or `fragment`

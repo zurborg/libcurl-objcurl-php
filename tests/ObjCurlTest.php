@@ -500,4 +500,14 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $resp = $curl->get();
         $resp->raise('meh', 123);
     }
+
+    public function test020() {
+        $curl = $this->curl();
+        $resp = $curl->get();
+        $times = $resp->times();
+        $this->assertGreaterThan(0, Arr::get($times, 'init'));
+        $this->assertGreaterThan(0, Arr::get($times, 'setopt'));
+        $this->assertGreaterThan(0, Arr::get($times, 'exec'));
+        $this->assertGreaterThan(0, Arr::get($times, 'cleanup'));
+    }
 }
