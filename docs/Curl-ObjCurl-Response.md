@@ -80,6 +80,19 @@ cURL getinfo
 
 
 
+### times
+
+    array<mixed,float> Curl\ObjCurl\Response::times()
+
+Return performance data
+
+
+
+* Visibility: **public**
+
+
+
+
 ### url
 
     mixed Curl\ObjCurl\Response::url(string $part)
