@@ -368,7 +368,7 @@ class Response
      * Log result depending on status code
      *
      * @param AbstractLogger $logger A logging instance
-     * @param int $min_level Minimum level of status code (2 for 2xx, 3 for 3xx, 4 for 4xx, ...)
+     * @param int $min_level Minimum level of status code (`2` for 2xx, `3` for 3xx, `4` for 4xx, ...)
      * @return void
      */
     public function complain(AbstractLogger $logger, int $min_level = 3)
