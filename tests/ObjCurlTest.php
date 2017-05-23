@@ -521,4 +521,17 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertSame(false, $resp->is(1));
         $this->assertSame(false, $resp->is(3));
     }
+
+    public function test022()
+    {
+        $curl = $this->curl();
+        $curl->path('/json.php');
+        $resp = $curl->get();
+        $data = $resp->decodeJSON(true);
+        $this->assertInternalType('array', $data);
+        $data = $resp->decodeJSON(false);
+        $this->assertInstanceOf(\stdClass::class, $data);
+        $data = $resp->decode();
+        $this->assertInstanceOf(\stdClass::class, $data);
+    }
 }

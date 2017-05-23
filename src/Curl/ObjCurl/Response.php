@@ -280,16 +280,16 @@ class Response
      *
      * @param  bool $assoc convert objects to associative arrays
      * @throw  \Wrap\JSON\DecodeException
-     * @return mixed
+     * @return mixed|stdClass
      */
     public function decodeJSON(bool $assoc = false)
     {
         $json = $this->payload;
 
         if ($assoc) {
-            return JSON::decodeArray($json);
+            return (array) JSON::decodeArray($json);
         } else {
-            return JSON::decodeObject($json);
+            return (object) JSON::decodeObject($json);
         }
     }
 
@@ -303,7 +303,7 @@ class Response
      */
     public function decode(string $default_type = null)
     {
-        $type = $this->contentType() or $default_type;
+        $type = $this->contentType() ?? $default_type;
         if (!$type) {
             throw new \RuntimeException("No content type in response header found");
         }

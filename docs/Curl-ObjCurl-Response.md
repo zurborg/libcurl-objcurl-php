@@ -257,7 +257,7 @@ Condensed MIME content type
 
 ### decodeJSON
 
-    mixed Curl\ObjCurl\Response::decodeJSON(boolean $assoc)
+    mixed|\Curl\ObjCurl\stdClass Curl\ObjCurl\Response::decodeJSON(boolean $assoc)
 
 Decode JSON payload
 
