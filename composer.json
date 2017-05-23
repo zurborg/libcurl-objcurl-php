@@ -1,4 +1,17 @@
 {
+   "require" : {
+      "ext-openssl" : "*",
+      "zurborg/pirate-hooray" : "~1.3",
+      "php" : "~7",
+      "ext-intl" : "*",
+      "ext-curl" : "*",
+      "ext-iconv" : "*",
+      "zurborg/wrap-json" : "~1.0",
+      "sabre/uri" : "*",
+      "ext-xml" : "*"
+   },
+   "description" : "Object-orientated cURL class for PHP",
+   "homepage" : "https://github.com/zurborg/libcurl-objcurl-php",
    "archive" : {
       "exclude" : [
          ".*",
@@ -11,42 +24,29 @@
          "composer.yaml"
       ]
    },
-   "require" : {
-      "ext-openssl" : "*",
-      "ext-iconv" : "*",
-      "ext-intl" : "*",
-      "zurborg/wrap-json" : "~1.0",
-      "sabre/uri" : "*",
-      "php" : "~7",
-      "ext-xml" : "*",
-      "ext-curl" : "*",
-      "zurborg/pirate-hooray" : "~1.3"
+   "license" : "MIT",
+   "require-dev" : {
+      "phpdocumentor/phpdocumentor" : "~2",
+      "evert/phpdoc-md" : "~0",
+      "squizlabs/php_codesniffer" : "~2",
+      "phpunit/phpunit" : "~5"
    },
-   "minimum-stability" : "stable",
    "name" : "zurborg/curl-objcurl",
-   "description" : "Object-orientated cURL class for PHP",
-   "keywords" : [
-      "curl"
+   "authors" : [
+      {
+         "name" : "David Zurborg",
+         "homepage" : "https://zurborg.github.io/",
+         "email" : "zurborg@cpan.org"
+      }
    ],
    "autoload" : {
       "psr-0" : {
          "Curl" : "src/"
       }
    },
-   "homepage" : "https://github.com/zurborg/libcurl-objcurl-php",
-   "authors" : [
-      {
-         "homepage" : "https://zurborg.github.io/",
-         "email" : "zurborg@cpan.org",
-         "name" : "David Zurborg"
-      }
+   "keywords" : [
+      "curl"
    ],
-   "license" : "MIT",
    "type" : "library",
-   "require-dev" : {
-      "phpdocumentor/phpdocumentor" : "~2",
-      "evert/phpdoc-md" : "~0",
-      "phpunit/phpunit" : "~5",
-      "squizlabs/php_codesniffer" : "~2"
-   }
+   "minimum-stability" : "stable"
 }
