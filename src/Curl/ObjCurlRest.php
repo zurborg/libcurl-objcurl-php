@@ -28,7 +28,14 @@ use Pirate\Hooray\Str;
  */
 class ObjCurlRest extends ObjCurl
 {
-    protected function preparePath(array $params)
+    /**
+     * Replace placeholders with values
+     *
+     * @param string[] $params Path parameters
+     *
+     * @return self
+     */
+    public function params(array $params)
     {
         $path = $this->url['path'];
         Str::replace(
@@ -36,13 +43,13 @@ class ObjCurlRest extends ObjCurl
             '/:(\w+)/',
             function ($match) use (&$params, $path) {
                 $key = $match[1];
-                Arr::assert($params, $match[1], "Path $path - key $key not found");
+                Arr::assert($params, $match[1], "Path $path - key :$key not found");
                 return urlencode(Arr::consume($params, $key));
             }
         );
         $this->queries($params);
         $this->url['path'] = $path;
-        return;
+        return $this;
     }
 
     /**
@@ -54,7 +61,7 @@ class ObjCurlRest extends ObjCurl
      */
     public function create(array $params = [])
     {
-        $this->preparePath($params);
+        $this->params($params);
         return parent::post();
     }
 
@@ -67,7 +74,7 @@ class ObjCurlRest extends ObjCurl
      */
     public function read(array $params = [])
     {
-        $this->preparePath($params);
+        $this->params($params);
         return parent::get();
     }
 
@@ -80,7 +87,7 @@ class ObjCurlRest extends ObjCurl
      */
     public function update(array $params = [])
     {
-        $this->preparePath($params);
+        $this->params($params);
         return parent::put();
     }
 
@@ -93,7 +100,7 @@ class ObjCurlRest extends ObjCurl
      */
     public function delete(array $params = [])
     {
-        $this->preparePath($params);
+        $this->params($params);
         return parent::delete();
     }
 
@@ -106,7 +113,7 @@ class ObjCurlRest extends ObjCurl
      */
     public function patch(array $params = [])
     {
-        $this->preparePath($params);
+        $this->params($params);
         return parent::patch();
     }
 }

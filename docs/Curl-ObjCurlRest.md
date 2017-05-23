@@ -62,6 +62,22 @@ Methods
 -------
 
 
+### params
+
+    \Curl\ObjCurlRest Curl\ObjCurlRest::params(array<mixed,string> $params)
+
+Replace placeholders with values
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $params **array&lt;mixed,string&gt;** - &lt;p&gt;Path parameters&lt;/p&gt;
+
+
+
 ### create
 
     mixed Curl\ObjCurlRest::create(array<mixed,string> $params)

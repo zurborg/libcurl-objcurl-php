@@ -2,16 +2,17 @@
 
 namespace Curl;
 
-use \Sabre\Uri;
+use PHPUnit_Framework_TestCase;
+use Sabre\Uri;
 
 class ObjCurlRestDump extends ObjCurlRest {
     public function __url(array $params) {
-        $this->preparePath($params);
+        $this->params($params);
         return Uri\build($this->url);
     }
 }
 
-class ObjCurlRestTest extends \PHPUnit_Framework_TestCase
+class ObjCurlRestTest extends PHPUnit_Framework_TestCase
 {
     public function test001() {
         $curl = new ObjCurlRestDump('/:foo');
