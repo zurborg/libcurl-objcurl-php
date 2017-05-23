@@ -9,7 +9,6 @@
  */
 namespace Curl;
 
-use Psr\Log\AbstractLogger;
 use Sabre\Uri;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
@@ -53,7 +52,6 @@ class ObjCurl
     protected $payload;
     protected $referer;
     protected $cookies = [];
-    protected $logger;
     protected $ID;
 
     /**
@@ -691,27 +689,6 @@ class ObjCurl
     }
 
     /**
-     * Set log engine
-     *
-     * @param  \Psr\Log\AbstractLogger $logger
-     * @return self
-     */
-    public function logger(AbstractLogger $logger)
-    {
-        $this->logger = $logger;
-        return $this;
-    }
-
-    protected function _log($level, string $message, array $context = [])
-    {
-        $context['objcurl_id'] = $this->ID;
-
-        if ($this->logger instanceof AbstractLogger) {
-            $this->logger->log($level, $message, $context);
-        }
-    }
-
-    /**
      * Get unique ID of request
      *
      * @return string UUID
@@ -766,8 +743,6 @@ class ObjCurl
             $this->_hardopt('httpheader', array_values($this->headers));
         }
 
-        $this->_log('debug', $this->method.' '.$url, [ 'curlopt' => $this->options ]);
-
         $T['init'] = microtime(true);
 
         $curl = curl_init();
@@ -799,7 +774,6 @@ class ObjCurl
         curl_close($curl);
 
         if ($curl_error_code !== 0) {
-            $this->_log('alert', $curl_error_message, [ 'curl_errno' => $curl_error_code ]);
             throw new ObjCurl\Exception($curl_error_message, $curl_error_code);
         }
 
@@ -808,33 +782,6 @@ class ObjCurl
             list($header, $payload) = explode("\r\n\r\n", $payload, 2);
         }
         list($status_line, $header) = explode("\r\n", $header, 2);
-
-        $http_code = Arr::get($curl_getinfo, 'http_code', 0);
-
-        $level = 0;
-        switch (intval(substr($http_code, 0, 1))) {
-            case 2:
-                $level = 'info';
-                break;
-            case 3:
-                $level = 'note';
-                break;
-            case 4:
-                $level = 'warning';
-                break;
-            case 5:
-                $level = 'error';
-                break;
-            default:
-                $level = 'critical';
-                break;
-        }
-
-        $this->_log($level, $status_line, [
-            'curl'                  => $curl_getinfo,
-            'curl_times'            => $T,
-            'curl_respsonse_header' => $header,
-        ]);
 
         $headers = iconv_mime_decode_headers($header, ICONV_MIME_DECODE_CONTINUE_ON_ERROR);
 

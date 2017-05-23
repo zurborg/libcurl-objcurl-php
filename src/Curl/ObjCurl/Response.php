@@ -13,6 +13,7 @@ use Pirate\Hooray\Arr;
 use Sabre\Uri;
 use Wrap\JSON;
 use DOMDocument;
+use Psr\Log\AbstractLogger;
 
 /**
  * ObjCurl respsonse class
@@ -361,5 +362,51 @@ class Response
         $e = new Exception($reason, $code);
         $e->Response = $this;
         throw $e;
+    }
+
+    /**
+     * Log result depending on status code
+     *
+     * @param AbstractLogger $logger A logging instance
+     * @param int $min_level Minimum level of status code (2 for 2xx, 3 for 3xx, 4 for 4xx, ...)
+     * @return void
+     */
+    public function complain(AbstractLogger $logger, int $min_level = 3)
+    {
+        $http_code = Arr::get($this->getinfo, 'http_code', 0);
+
+        if ($http_code < $min_level) {
+            return;
+        }
+
+        $url = Arr::get($this->getinfo, 'url');
+        $message = "Request to $url returned $http_code";
+
+        if ($redirect = Arr::get($this->headers, 'location', null)) {
+            $message .= "\nRedirect to $redirect";
+        }
+
+        $level = 0;
+        switch (intval(substr($http_code, 0, 1))) {
+            case 2:
+                $level = 'info';
+                break;
+            case 3:
+                $level = 'note';
+                break;
+            case 4:
+                $level = 'warning';
+                break;
+            case 5:
+                $level = 'error';
+                break;
+            default:
+                $level = 'critical';
+                break;
+        }
+
+        $logger->log($level, $message);
+
+        return;
     }
 }

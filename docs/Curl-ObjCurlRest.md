@@ -771,23 +771,6 @@ Submit request with PUT method
 
 
 
-### logger
-
-    \Curl\ObjCurl Curl\ObjCurl::logger(\Psr\Log\AbstractLogger $logger)
-
-Set log engine
-
-
-
-* Visibility: **public**
-* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
-
-
-#### Arguments
-* $logger **Psr\Log\AbstractLogger**
-
-
-
 ### id
 
     string Curl\ObjCurl::id()

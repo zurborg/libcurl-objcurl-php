@@ -332,3 +332,20 @@ Throws this response as an runtime exception
 * $code **integer**
 
 
+
+### complain
+
+    void Curl\ObjCurl\Response::complain(\Psr\Log\AbstractLogger $logger, integer $min_level)
+
+Log result depending on status code
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $logger **Psr\Log\AbstractLogger** - &lt;p&gt;A logging instance&lt;/p&gt;
+* $min_level **integer** - &lt;p&gt;Minimum level of status code (2 for 2xx, 3 for 3xx, 4 for 4xx, ...)&lt;/p&gt;
+
+

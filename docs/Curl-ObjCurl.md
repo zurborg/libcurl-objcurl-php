@@ -660,22 +660,6 @@ Submit request with PATCH method
 
 
 
-### logger
-
-    \Curl\ObjCurl Curl\ObjCurl::logger(\Psr\Log\AbstractLogger $logger)
-
-Set log engine
-
-
-
-* Visibility: **public**
-
-
-#### Arguments
-* $logger **Psr\Log\AbstractLogger**
-
-
-
 ### id
 
     string Curl\ObjCurl::id()
