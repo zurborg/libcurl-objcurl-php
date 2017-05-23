@@ -346,6 +346,6 @@ Log result depending on status code
 
 #### Arguments
 * $logger **Psr\Log\AbstractLogger** - &lt;p&gt;A logging instance&lt;/p&gt;
-* $min_level **integer** - &lt;p&gt;Minimum level of status code (2 for 2xx, 3 for 3xx, 4 for 4xx, ...)&lt;/p&gt;
+* $min_level **integer** - &lt;p&gt;Minimum level of status code (&lt;code&gt;2&lt;/code&gt; for 2xx, &lt;code&gt;3&lt;/code&gt; for 3xx, &lt;code&gt;4&lt;/code&gt; for 4xx, ...)&lt;/p&gt;
 
 
