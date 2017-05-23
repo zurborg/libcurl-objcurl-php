@@ -106,6 +106,23 @@ class Response
     }
 
     /**
+     * Checks whether a HTTP status code matches
+     *
+     * ```php
+     * $response->is(200); // matches only code 200
+     * $response->is(30);  // matches 30x (300..309)
+     * $response->is(4);   // matches 4xx (400..499)
+     * ```
+     *
+     * @param  int  $code HTTP status code (1, 2 or 3 digits)
+     * @return bool
+     */
+    public function is(int $code)
+    {
+        return $code === intval(substr($this->info('http_code'), 0, strlen((string) $code)));
+    }
+
+    /**
      * cURL getinfo
      *
      * @param  string $key

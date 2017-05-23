@@ -50,6 +50,26 @@ $response->status(1) === 2; // status code is 2xx
 
 
 
+### is
+
+    boolean Curl\ObjCurl\Response::is(integer $code)
+
+Checks whether a HTTP status code matches
+
+```php
+$response->is(200); // matches only code 200
+$response->is(30);  // matches 30x (300..309)
+$response->is(4);   // matches 4xx (400..499)
+```
+
+* Visibility: **public**
+
+
+#### Arguments
+* $code **integer** - &lt;p&gt;HTTP status code (1, 2 or 3 digits)&lt;/p&gt;
+
+
+
 ### info
 
     mixed Curl\ObjCurl\Response::info(string $key, mixed $default)
