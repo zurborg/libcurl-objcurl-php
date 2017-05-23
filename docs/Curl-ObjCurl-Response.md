@@ -271,6 +271,22 @@ Decode JSON payload
 
 
 
+### decodeXML
+
+    \DOMDocument Curl\ObjCurl\Response::decodeXML(integer $options)
+
+Decode XML payload
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $options **integer** - &lt;p&gt;Bitwise OR of the libxml option constants.&lt;/p&gt;
+
+
+
 ### decode
 
     mixed Curl\ObjCurl\Response::decode(string $default_type)

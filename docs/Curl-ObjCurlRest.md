@@ -611,6 +611,24 @@ Encode payload as JSON and set Accept- and Content-Type-headers accordingly
 
 
 
+### xml
+
+    \Curl\ObjCurl Curl\ObjCurl::xml(\Curl\DOMDocument $doc, string $contentType)
+
+Encode paylod as XML and set Accept- and Content-Type-headers accordingly
+
+
+
+* Visibility: **public**
+* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
+
+
+#### Arguments
+* $doc **Curl\DOMDocument** - &lt;p&gt;XML DOM&lt;/p&gt;
+* $contentType **string**
+
+
+
 ### form
 
     \Curl\ObjCurl Curl\ObjCurl::form(array<mixed,string> $data)

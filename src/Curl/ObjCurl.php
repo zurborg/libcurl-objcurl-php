@@ -543,6 +543,24 @@ class ObjCurl
     }
 
     /**
+     * Encode paylod as XML and set Accept- and Content-Type-headers accordingly
+     *
+     * @param  DOMDocument $doc XML DOM
+     * @param  string      $contentType
+     * @return self
+     */
+    public function xml(DOMDocument $doc = null, string $contentType = 'application/xml')
+    {
+        if (!is_null($data)) {
+            $xml = (string) $doc->saveXML();
+            $this->contentType($contentType);
+            $this->payload($xml);
+        }
+        $this->accept($contentType);
+        return $this;
+    }
+
+    /**
      * Encode payload as application/x-www-form-urlencoded
      *
      * @param  string[] $data

@@ -5,7 +5,7 @@ phpcs=$(php) vendor/squizlabs/php_codesniffer/scripts/phpcs
 phpunit=$(php) vendor/phpunit/phpunit/phpunit
 phpdoc=$(php) vendor/phpdocumentor/phpdocumentor/bin/phpdoc
 phpdocmd=$(php) vendor/evert/phpdoc-md/bin/phpdocmd
-yaml2json=$(perl) -MJSON -MYAML -eprint -e'encode_json(YAML::Load(join""=><>))'
+yaml2json=$(perl) -MJSON -MYAML -eprint -e'to_json(YAML::Load(join""=><>),{pretty=>1})'
 getversion=$(perl) -MYAML -eprint -e'YAML::Load(join""=><>)->{version}'
 V=`$(getversion) < composer.yaml`
 

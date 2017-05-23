@@ -12,6 +12,7 @@ namespace Curl\ObjCurl;
 use Pirate\Hooray\Arr;
 use Sabre\Uri;
 use Wrap\JSON;
+use DOMDocument;
 
 /**
  * ObjCurl respsonse class
@@ -294,6 +295,20 @@ class Response
     }
 
     /**
+     * Decode XML payload
+     *
+     * @param int $options Bitwise OR of the libxml option constants.
+     *
+     * @return DOMDocument
+     */
+    public function decodeXML(int $options = 0)
+    {
+        $doc = new DOMDocument();
+        $doc->loadXML($this->payload, $options);
+        return $doc;
+    }
+
+    /**
      * Decode payload (generic method with auto-detection)
      *
      * Currently only JSON is supported.
@@ -311,6 +326,9 @@ class Response
         switch (true) {
             case ($type === 'application/json'):
                 return $this->decodeJSON();
+            case ($type === 'application/xml'):
+            case ($type === 'text/xml'):
+                return $this->decodeXML();
         }
 
         throw new \RuntimeException("Unknown content type in response header: $type");
