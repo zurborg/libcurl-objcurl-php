@@ -16,7 +16,7 @@ before_script:
   - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
   - sudo service apache2 restart
   - composer self-update
-  - composer install --prefer-dist -vvv
+  - composer install --prefer-dist
 
 script:
   - ./phpcs --warning-severity=0 --standard=PSR2 src
