@@ -9,9 +9,10 @@
  */
 namespace Curl;
 
-use \Sabre\Uri;
-use \Pirate\Hooray\Arr;
-use \Pirate\Hooray\Str;
+use Sabre\Uri;
+use Pirate\Hooray\Arr;
+use Pirate\Hooray\Str;
+use Wrap\JSON;
 
 /**
  * ObjCurl is a chainable class for creating reuseable objects
@@ -23,21 +24,16 @@ class ObjCurl
 
     const DEFAULT_TIMEOUT = 30;
 
+    const MIN_CURL_VERSION = 65536 *   7 // major
+                           +   256 *  22 // minor
+                           +     1 *   0 // patch
+    ;
+
     const FEATURES = [
         'ipv6',
         'kerberos4',
         'ssl',
         'libz',
-    ];
-
-    const SECURE_MAP = [
-        'ftp'   => 'ftps',
-        'http'  => 'https',
-        'imap'  => 'imaps',
-        'ldap'  => 'ldaps',
-        'pop3'  => 'pop3s',
-        'smb'   => 'smbs',
-        'smtp'  => 'smtps',
     ];
 
     use ObjCurl\HelperTrait;
@@ -56,7 +52,6 @@ class ObjCurl
     protected $payload;
     protected $referer;
     protected $cookies = [];
-    protected $logger;
     protected $ID;
 
     /**
@@ -72,8 +67,17 @@ class ObjCurl
  
         $this->url($url);
 
-        $this->timeout(self::DEFAULT_TIMEOUT);
+        $this->reset();
+    }
 
+    /**
+     * Reset every cURL-specific option except URL
+     *
+     * @return self
+     */
+    public function reset()
+    {
+        $this->timeout(self::DEFAULT_TIMEOUT);
         $this->_init([
             'header'          => true,
             'returntransfer'  => true,
@@ -85,6 +89,7 @@ class ObjCurl
             'pipewait'        => true,
             'safe_upload'     => true,
         ]);
+        return $this;
     }
 
     protected static function _initialize()
@@ -94,6 +99,12 @@ class ObjCurl
         }
 
         self::$version = curl_version();
+
+        $curl_version_string = Arr::get(self::$version, 'version', 0);
+        $curl_version_number = Arr::get(self::$version, 'version_number', 0);
+        if (self::MIN_CURL_VERSION > $curl_version_number) {
+            throw new \Exception(sprintf('Insufficient version of cURL: %d required, but only %d (v%s) is installed', self::MIN_CURL_VERSION, $curl_version_number, $curl_version_string));
+        }
 
         $featuremap = Arr::get(self::$version, 'features', chr(0));
 
@@ -110,6 +121,40 @@ class ObjCurl
         self::$initialized = true;
 
         return;
+    }
+
+    /**
+     * Get some information about cURL
+     *
+     * ```php
+     * $curl_version = ObjCurl::version();
+     * ```
+     *
+     * @param string $param key param
+     * @param mixed $default fallback value
+     * @return mixed
+     */
+    public static function version($param = 'version', $default = null)
+    {
+        if (!self::$initialized) {
+             self::_initialize();
+        }
+        return Arr::get(self::$version, $param, $default);
+    }
+
+    /**
+     * Get a full list of supported cURL features
+     *
+     * The values in the array are either a version for example or just `true`.
+     *
+     * @return array
+     */
+    public static function features()
+    {
+        if (!self::$initialized) {
+             self::_initialize();
+        }
+        return self::$features;
     }
 
     protected function _can($feature)
@@ -129,14 +174,24 @@ class ObjCurl
         return;
     }
 
-    protected function _has($constant)
+    protected function _hasopt($key)
     {
-        return defined('CURLOPT_'.strtoupper($constant));
+        $name = strtoupper('curlopt_' . $key);
+        return defined($name);
     }
 
-    protected function _set($key, $val)
+    protected function _hardopt($key, $val)
     {
-        if ($this->_has($key)) {
+        if (!$this->_hasopt($key)) {
+            throw new \InvalidArgumentException("Unknown cURL option: $key");
+        }
+        $this->options[$key] = $val;
+        return;
+    }
+
+    protected function _softopt($key, $val)
+    {
+        if ($this->_hasopt($key)) {
             $this->options[$key] = $val;
             return true;
         } else {
@@ -146,8 +201,9 @@ class ObjCurl
 
     protected function _init(array $options)
     {
+        $this->options = [];
         foreach ($options as $key => $val) {
-            $this->_set($key, $val);
+            $this->_softopt($key, $val);
         }
         return;
     }
@@ -155,27 +211,42 @@ class ObjCurl
     /**
      * Set a SSL option
      *
+     * Recognized boolean options:
+     * + `falsestart`
+     * + `enable_alpn`
+     * + `enable_npn`
+     * + `verifypeer`
+     * + `verifystatus`
+     *
+     * Integer options:
+     * + `verifyhost`
+     *
+     * String options:
+     * + `cipher_list` (but see also `ciphers` method below)
+     *
      * @param  string $key Name
      * @param  mixed  $val Value
      * @return self
      */
     public function sslopt($key, $val)
     {
-        if ($this->_set("ssl_$key", $val) !== true) {
-            throw new \Exception("Unknown cURL SSL option <$key>");
-        }
+        $this->_hardopt("ssl_$key", $val);
         return $this;
     }
 
     /**
      * Set SSL ciphers
      *
+     * ```php
+     * $objcurl->ciphers(['RSA+AES', 'ECDHE+AES'])
+     * ```
+     *
      * @param  string[] $list List of ciphers
      * @return self
      */
     public function ciphers(array $list)
     {
-        $this->_set('ssl_cipher_list', implode(':', $list));
+        $this->_hardopt('ssl_cipher_list', implode(':', $list));
         return $this;
     }
 
@@ -189,9 +260,9 @@ class ObjCurl
      */
     public function certificate($file, $type = 'pem', $pass = null)
     {
-        $this->_set('sslcert', $file);
-        $this->_set('sslcerttype', strtoupper($type));
-        $this->_set('sslcertpasswd', $pass);
+        $this->_hardopt('sslcert', $file);
+        $this->_hardopt('sslcerttype', strtoupper($type));
+        $this->_hardopt('sslcertpasswd', $pass);
         return $this;
     }
 
@@ -205,9 +276,9 @@ class ObjCurl
      */
     public function privateKey($file, $type = 'pem', $pass = null)
     {
-        $this->_set('sslkey', $file);
-        $this->_set('sslkeytype', strtoupper($type));
-        $this->_set('sslkeypasswd', $pass);
+        $this->_hardopt('sslkey', $file);
+        $this->_hardopt('sslkeytype', strtoupper($type));
+        $this->_hardopt('sslkeypasswd', $pass);
         return $this;
     }
 
@@ -229,35 +300,32 @@ class ObjCurl
     }
 
     /**
-     * Set URI scheme
-     *
-     * @param  string $scheme
-     * @return self
-     */
-    public function scheme($scheme)
-    {
-        $this->url['scheme'] = $scheme;
-        return $this;
-    }
-
-    /**
-     * Force secure variant of URI scheme
-     *
-     * Replaces 'http' with 'https' and so on
+     * Use SSL (HTTPS)
      *
      * @return self
      */
     public function secure()
     {
         $this->_require('ssl', 'SSL is not supported by cURL');
-        $this->url['scheme'] = Arr::get(self::SECURE_MAP, $this->url['scheme'], $this->url['scheme']);
+        $this->url['scheme'] = 'https';
+        return $this;
+    }
+
+    /**
+     * Do not use SSL
+     *
+     * @return self
+     */
+    public function insecure()
+    {
+        $this->url['scheme'] = 'http';
         return $this;
     }
 
     /**
      * Set user-part of URI
      *
-     * This the @user part before the hostname of an URI
+     * This is the @user part before the hostname of an URI
      *
      * @param  string $user
      * @return self
@@ -326,10 +394,10 @@ class ObjCurl
      */
     public function timeout($seconds)
     {
-        if ($this->_has('timeout_ms')) {
-            $this->_set('timeout_ms', intval($seconds * 1000));
+        if ($this->_hasopt('timeout_ms')) {
+            $this->_softopt('timeout_ms', intval($seconds * 1000));
         } else {
-            $this->_set('timeout', intval($seconds));
+            $this->_softopt('timeout', intval($seconds));
         }
         return $this;
     }
@@ -337,13 +405,13 @@ class ObjCurl
     /**
      * Set a single header field
      *
-     * @param  string $key   Fancy name of header field
+     * @param  string $key   Name of header field
      * @param  string $value Value of header field
      * @return self
      */
     public function header($key, $value = null)
     {
-        $key = self::encodeKey($key);
+        $key = strtolower($key);
         if (is_null($value)) {
             unset($this->headers[$key]);
         } else {
@@ -360,7 +428,7 @@ class ObjCurl
      * @param  string[] $headers
      * @return self
      */
-    public function headers($headers)
+    public function headers(array $headers)
     {
         foreach ($headers as $key => $value) {
             $this->header($key, $value);
@@ -388,7 +456,7 @@ class ObjCurl
      */
     public function contentType($contentType)
     {
-        $this->header('ContentType', $contentType);
+        $this->header('Content-Type', $contentType);
         return $this;
     }
 
@@ -401,9 +469,6 @@ class ObjCurl
      */
     public function query($key, $value = null)
     {
-        if (!is_null($value)) {
-            $value = (string) $value;
-        }
         if (!Str::ok($value)) {
             unset($this->query[$key]);
         } else {
@@ -461,17 +526,33 @@ class ObjCurl
      *
      * @param  array|object $data
      * @param  string       $contentType
+     * @throw  \Wrap\JSON\EncodeException
      * @return self
      */
     public function json($data = null, $contentType = 'application/json')
     {
         if (!is_null($data)) {
-            $json = json_encode($data);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception(json_last_error_msg());
-            }
+            $json = JSON::encode($data);
             $this->contentType($contentType);
             $this->payload($json);
+        }
+        $this->accept($contentType);
+        return $this;
+    }
+
+    /**
+     * Encode paylod as XML and set Accept- and Content-Type-headers accordingly
+     *
+     * @param  DOMDocument $doc XML DOM
+     * @param  string      $contentType
+     * @return self
+     */
+    public function xml($doc = null, $contentType = 'application/xml')
+    {
+        if (!is_null($data)) {
+            $xml = (string) $doc->saveXML();
+            $this->contentType($contentType);
+            $this->payload($xml);
         }
         $this->accept($contentType);
         return $this;
@@ -608,28 +689,7 @@ class ObjCurl
     }
 
     /**
-     * Set log engine
-     *
-     * @param  \Psr\Log\AbstractLogger $logger
-     * @return self
-     */
-    public function logger(\Psr\Log\AbstractLogger $logger)
-    {
-        $this->logger = $logger;
-        return this;
-    }
-
-    protected function _log($level, $message, array $context = [])
-    {
-        $context['objcurl_id'] = $this->ID;
-
-        if ($this->logger instanceof \Psr\Log\AbstractLogger) {
-            $this->logger->log($level, $message, $context);
-        }
-    }
-
-    /**
-     * Unique ID of reques
+     * Get unique ID of request
      *
      * @return string UUID
      */
@@ -640,57 +700,77 @@ class ObjCurl
 
     protected function _exec()
     {
+        $T = [];
+        $T[0] = microtime(true);
+
         $this->ID = Str::uuidV4();
 
         $url = Uri\build($this->url);
 
-        $this->_set('url', $url);
+        $this->_hardopt('url', $url);
 
         if (!is_null($this->basic_auth_user)) {
-            $this->_set('httpauth', CURLAUTH_BASIC);
-            if (is_null($this->basic_auth_pass)) {
-                $this->_set('userpwd', $this->basic_auth_user);
-            } else {
-                $this->_set('userpwd', $this->basic_auth_user . ':' . $this->basic_auth_pass);
+            if ($this->_softopt('httpauth', CURLAUTH_BASIC)) {
+                if (is_null($this->basic_auth_pass)) {
+                    $this->_softopt('userpwd', $this->basic_auth_user);
+                } else {
+                    $this->_softopt('userpwd', $this->basic_auth_user . ':' . $this->basic_auth_pass);
+                }
             }
         }
 
         if ($this->method === 'HEAD') {
-            $this->_set('httpget', true);
-            $this->_set('nobody', true);
+            $this->_hardopt('httpget', true);
+            $this->_hardopt('nobody', true);
         } elseif ($this->method === 'GET') {
-            $this->_set('httpget', true);
+            $this->_hardopt('httpget', true);
         } else {
-            $this->_set('customrequest', $this->method);
+            $this->_hardopt('customrequest', $this->method);
             if (!is_null($this->payload)) {
-                $this->_set('postfields', $this->payload);
+                $this->_hardopt('postfields', $this->payload);
             }
         }
 
         if (!is_null($this->referer)) {
-            $this->_set('referer', $this->referer);
+            $this->_softopt('referer', $this->referer);
         }
 
         if (count($this->cookies)) {
-            $this->_set('cookie', http_build_query($this->cookies, '', '; '));
+            $this->_hardopt('cookie', http_build_query($this->cookies, '', '; '));
         }
 
         if (count($this->headers)) {
-            $this->_set('httpheader', array_values($this->headers));
+            $this->_hardopt('httpheader', array_values($this->headers));
         }
 
-        $this->_log('debug', $this->method.' '.$url, [ 'curlopt' => $this->options ]);
+        $T['init'] = microtime(true);
 
         $curl = curl_init();
 
         $options = [];
         foreach ($this->options as $key => $val) {
-            $options[constant(strtoupper('curlopt_'.$key))] = $val;
+            $name = strtoupper('curlopt_' . $key);
+            if (defined($name)) {
+                $constant = constant($name);
+                $options[$constant] = $val;
+            } else {
+                throw new \InvalidArgumentException("Unknown cURL option: $key (constant: $name)");
+            }
         }
 
         curl_setopt_array($curl, $options);
         curl_setopt($curl, CURLINFO_HEADER_OUT, true);
+
+        $T['setopt'] = microtime(true);
+
+        return $this->_finish($curl, $T);
+    }
+
+    protected function _finish($curl, array $T)
+    {
         $payload = curl_exec($curl);
+
+        $T['exec'] = microtime(true);
 
         $curl_error_code        = curl_errno($curl);
         $curl_error_message     = curl_error($curl);
@@ -699,49 +779,26 @@ class ObjCurl
         curl_close($curl);
 
         if ($curl_error_code !== 0) {
-            $this->_log('alert', $curl_error_message, [ 'curl_errno' => $curl_error_code ]);
             throw new ObjCurl\Exception($curl_error_message, $curl_error_code);
         }
 
         list($header, $payload) = explode("\r\n\r\n", $payload, 2);
-        while (preg_match('/^http\/\d+\.\d+\s+100/i', $header)) {
+        while (Str::match($header, '/^http\/\d+\.\d+\s+100/i')) {
             list($header, $payload) = explode("\r\n\r\n", $payload, 2);
         }
         list($status_line, $header) = explode("\r\n", $header, 2);
 
-        $http_code = Arr::get($curl_getinfo, 'http_code', 0);
-
-        $level = 0;
-        switch (intval(substr($http_code, 0, 1))) {
-            case 2:
-                $level = 'info';
-                break;
-            case 3:
-                $level = 'note';
-                break;
-            case 4:
-                $level = 'warning';
-                break;
-            case 5:
-                $level = 'error';
-                break;
-            default:
-                $level = 'critical';
-                break;
-        }
-
-        $this->_log($level, $status_line, [
-            'curl'                  => $curl_getinfo,
-            'curl_respsonse_header' => $header,
-        ]);
-
         $headers = iconv_mime_decode_headers($header, ICONV_MIME_DECODE_CONTINUE_ON_ERROR);
 
-        $fancy_headers = [];
+        $lower_headers = [];
         foreach ($headers as $key => $val) {
-            $fancy_headers[self::decodeKey($key)] = $val;
+            $lower_headers[strtolower($key)] = $val;
         }
-        $headers = $fancy_headers;
+        $headers = $lower_headers;
+
+        $T['cleanup'] = microtime(true);
+
+        $curl_getinfo['times'] = $T;
 
         return new ObjCurl\Response($this, $curl_getinfo, $headers, $payload);
     }

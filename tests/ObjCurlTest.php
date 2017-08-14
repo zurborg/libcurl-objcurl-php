@@ -2,7 +2,9 @@
 
 namespace Curl;
 
-use \Pirate\Hooray\Arr;
+use Pirate\Hooray\Arr;
+use Wrap\JSON;
+use PHPUnit_Framework_TestCase;
 
 class ObjCurlDump extends ObjCurl {
     public function __url() {
@@ -19,7 +21,7 @@ class ObjCurlDump extends ObjCurl {
     }
 }
 
-class ObjCurlTest extends \PHPUnit_Framework_TestCase
+class ObjCurlTest extends PHPUnit_Framework_TestCase
 {
     private function arrsert(array $array, $key, $val) {
         return $this->assertSame($val, Arr::get($array, $key));
@@ -38,7 +40,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
 
     private function interpret($resp)
     {
-        return (array) json_decode($resp->payload(), true);
+        return JSON::decodeArray($resp->payload());
     }
 
     public function test001() {
@@ -112,6 +114,36 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
             'query' => null,
             'fragment' => 'bar',
         ]);
+        $curl = new ObjCurlDump('http://localhost/');
+        $this->assertEquals($curl->__url(), [
+            'scheme' => 'http',
+            'host'  => 'localhost',
+            'path'  => '/',
+            'port'  => null,
+            'user'  => null,
+            'query' => null,
+            'fragment' => null,
+        ]);
+        $curl->secure();
+        $this->assertEquals($curl->__url(), [
+            'scheme' => 'https',
+            'host'  => 'localhost',
+            'path'  => '/',
+            'port'  => null,
+            'user'  => null,
+            'query' => null,
+            'fragment' => null,
+        ]);
+        $curl->insecure();
+        $this->assertEquals($curl->__url(), [
+            'scheme' => 'http',
+            'host'  => 'localhost',
+            'path'  => '/',
+            'port'  => null,
+            'user'  => null,
+            'query' => null,
+            'fragment' => null,
+        ]);
     }
 
     public function test002() {
@@ -135,19 +167,9 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
             'query' => 'query',
             'fragment' => 'fragment',
         ]);
-        $curl->scheme('SCHEME');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
-            'user'  => 'user',
-            'host'  => 'host',
-            'port'  => 123,
-            'path'  => '/path',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
         $curl->user('USER');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'host',
             'port'  => 123,
@@ -157,7 +179,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->host('HOST');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 123,
@@ -167,7 +189,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->port(456);
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -177,7 +199,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->path('/PATH');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -187,7 +209,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->query('foo', 'bar');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -197,7 +219,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         ]);
         $curl->query('foo');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
@@ -205,24 +227,14 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
             'query' => 'query=',
             'fragment' => 'fragment',
         ]);
-        $curl->queries(['foo'=>123,'bar'=>456]);
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
-            'user'  => 'USER',
-            'host'  => 'HOST',
-            'port'  => 456,
-            'path'  => '/PATH',
-            'query' => 'query=&foo=123&bar=456',
-            'fragment' => 'fragment',
-        ]);
         $curl->fragment('FRAGMENT');
         $this->assertEquals($curl->__url(), [
-            'scheme' => 'SCHEME',
+            'scheme' => 'scheme',
             'user'  => 'USER',
             'host'  => 'HOST',
             'port'  => 456,
             'path'  => '/PATH',
-            'query' => 'query=&foo=123&bar=456',
+            'query' => 'query=',
             'fragment' => 'FRAGMENT',
         ]);
     }
@@ -247,18 +259,18 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
 
         $curl->header('FOO', 123);
         $this->assertSame($curl->__headers(), [
-            'f-o-o' => 'f-o-o: 123',
+            'foo' => 'foo: 123',
         ]);
 
-        $curl->header('-bar', 456);
+        $curl->header('x-bar', 456);
         $this->assertSame($curl->__headers(), [
-            'f-o-o' => 'f-o-o: 123',
+            'foo'   => 'foo: 123',
             'x-bar' => 'x-bar: 456',
         ]);
 
         $curl->headers(['abc'=>'def','ghi'=>'jkl']);
         $this->assertSame($curl->__headers(), [
-            'f-o-o' => 'f-o-o: 123',
+            'foo'   => 'foo: 123',
             'x-bar' => 'x-bar: 456',
             'abc'   => 'abc: def',
             'ghi'   => 'ghi: jkl',
@@ -352,7 +364,7 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
 
     public function test008() {
         $curl = $this->curl();
-        $curl->header('XFooBar', 123456);
+        $curl->header('X-Foo-Bar', 123456);
         $resp = $curl->get();
         $this->assertSame(200, $resp->status(), "HTTP Status");
         $data = $this->interpret($resp);
@@ -364,8 +376,8 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         $curl->query('foobar', 123456);
         $resp = $curl->get();
         $this->assertSame(200, $resp->status(), "HTTP Status");
-        $data = $this->interpret($resp);
-        $this->assertPath($data, '/GET/foobar', '123456');
+        //$data = $this->interpret($resp);
+        //$this->assertPath($data, '/GET/foobar', '123456');
     }
 
     public function test010() {
@@ -443,5 +455,72 @@ class ObjCurlTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($curl->id(), $resp->id());
         $this->assertNotSame($uuid, $resp->id());
         $this->assertNotSame($uuid, $curl->id());
+    }
+
+    /**
+     * @expectedException Curl\ObjCurl\Exception
+     * @expectedExceptionCode 6
+     * @expectedExceptionMessageRegExp /could.+resolve.+host.+nonexistent\.nodomain/i
+     */
+    public function test018() {
+        $curl = $this->curl();
+        $curl->host('nonexistent.nodomain');
+        $curl->get();
+    }
+
+    /**
+     * @expectedException Curl\ObjCurl\Exception
+     * @expectedExceptionCode 123
+     * @expectedExceptionMessage meh
+     */
+    public function test019() {
+        $curl = $this->curl();
+        $resp = $curl->get();
+        $resp->raise('meh', 123);
+    }
+
+    public function test020() {
+        $curl = $this->curl();
+        $resp = $curl->get();
+        $times = $resp->times();
+        $this->assertGreaterThan(0, Arr::get($times, 'init'));
+        $this->assertGreaterThan(0, Arr::get($times, 'setopt'));
+        $this->assertGreaterThan(0, Arr::get($times, 'exec'));
+        $this->assertGreaterThan(0, Arr::get($times, 'cleanup'));
+    }
+
+    public function test021() {
+        $curl = $this->curl();
+        $resp = $curl->get();
+        $this->assertSame(true, $resp->is(200));
+        $this->assertSame(true, $resp->is(20));
+        $this->assertSame(true, $resp->is(2));
+        $this->assertSame(false, $resp->is(0));
+        $this->assertSame(false, $resp->is(1));
+        $this->assertSame(false, $resp->is(3));
+    }
+
+    public function test022()
+    {
+        $curl = $this->curl();
+        $curl->path('/json.php');
+        $resp = $curl->get();
+        $data = $resp->decodeJSON(true);
+        $this->assertInternalType('array', $data);
+        $data = $resp->decodeJSON(false);
+        $this->assertInstanceOf(\stdClass::class, $data);
+        $data = $resp->decode();
+        $this->assertInstanceOf(\stdClass::class, $data);
+    }
+
+    public function test023()
+    {
+        $curl = $this->curl();
+        $curl->path('/xml.php');
+        $resp = $curl->get();
+        $data = $resp->decodeXML();
+        $this->assertInstanceOf(\DOMDocument::class, $data);
+        $data = $resp->decode();
+        $this->assertInstanceOf(\DOMDocument::class, $data);
     }
 }

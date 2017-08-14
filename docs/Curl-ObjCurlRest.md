@@ -40,17 +40,17 @@ Constants
 
 
 
+### MIN_CURL_VERSION
+
+    const MIN_CURL_VERSION = 65536 * 7 + 256 * 22 + 1 * 0
+
+
+
+
+
 ### FEATURES
 
     const FEATURES = array('ipv6', 'kerberos4', 'ssl', 'libz')
-
-
-
-
-
-### SECURE_MAP
-
-    const SECURE_MAP = array('ftp' => 'ftps', 'http' => 'https', 'imap' => 'imaps', 'ldap' => 'ldaps', 'pop3' => 'pop3s', 'smb' => 'smbs', 'smtp' => 'smtps')
 
 
 
@@ -60,6 +60,22 @@ Constants
 
 Methods
 -------
+
+
+### params
+
+    \Curl\ObjCurlRest Curl\ObjCurlRest::params(array<mixed,string> $params)
+
+Replace placeholders with values
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $params **array&lt;mixed,string&gt;** - &lt;p&gt;Path parameters&lt;/p&gt;
+
 
 
 ### create
@@ -155,13 +171,74 @@ Instanciates a new object
 
 
 
+### reset
+
+    \Curl\ObjCurl Curl\ObjCurl::reset()
+
+Reset every cURL-specific option except URL
+
+
+
+* Visibility: **public**
+* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
+
+
+
+
+### version
+
+    mixed Curl\ObjCurl::version(string $param, mixed $default)
+
+Get some information about cURL
+
+```php
+$curl_version = ObjCurl::version();
+```
+
+* Visibility: **public**
+* This method is **static**.
+* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
+
+
+#### Arguments
+* $param **string** - &lt;p&gt;key param&lt;/p&gt;
+* $default **mixed** - &lt;p&gt;fallback value&lt;/p&gt;
+
+
+
+### features
+
+    array Curl\ObjCurl::features()
+
+Get a full list of supported cURL features
+
+The values in the array are either a version for example or just `true`.
+
+* Visibility: **public**
+* This method is **static**.
+* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
+
+
+
+
 ### sslopt
 
     \Curl\ObjCurl Curl\ObjCurl::sslopt(string $key, mixed $val)
 
 Set a SSL option
 
+Recognized boolean options:
++ `falsestart`
++ `enable_alpn`
++ `enable_npn`
++ `verifypeer`
++ `verifystatus`
 
+Integer options:
++ `verifyhost`
+
+String options:
++ `cipher_list` (but see also `ciphers` method below)
 
 * Visibility: **public**
 * This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
@@ -179,7 +256,9 @@ Set a SSL option
 
 Set SSL ciphers
 
-
+```php
+$objcurl->ciphers(['RSA+AES', 'ECDHE+AES'])
+```
 
 * Visibility: **public**
 * This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
@@ -245,11 +324,11 @@ Set URL
 
 
 
-### scheme
+### secure
 
-    \Curl\ObjCurl Curl\ObjCurl::scheme(string $scheme)
+    \Curl\ObjCurl Curl\ObjCurl::secure()
 
-Set URI scheme
+Use SSL (HTTPS)
 
 
 
@@ -257,18 +336,15 @@ Set URI scheme
 * This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
 
 
-#### Arguments
-* $scheme **string**
 
 
+### insecure
 
-### secure
+    \Curl\ObjCurl Curl\ObjCurl::insecure()
 
-    \Curl\ObjCurl Curl\ObjCurl::secure()
+Do not use SSL
 
-Force secure variant of URI scheme
 
-Replaces 'http' with 'https' and so on
 
 * Visibility: **public**
 * This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
@@ -282,7 +358,7 @@ Replaces 'http' with 'https' and so on
 
 Set user-part of URI
 
-This the @user part before the hostname of an URI
+This is the @user part before the hostname of an URI
 
 * Visibility: **public**
 * This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
@@ -391,7 +467,7 @@ Set a single header field
 
 
 #### Arguments
-* $key **string** - &lt;p&gt;Fancy name of header field&lt;/p&gt;
+* $key **string** - &lt;p&gt;Name of header field&lt;/p&gt;
 * $value **string** - &lt;p&gt;Value of header field&lt;/p&gt;
 
 
@@ -531,6 +607,24 @@ Encode payload as JSON and set Accept- and Content-Type-headers accordingly
 
 #### Arguments
 * $data **array|object**
+* $contentType **string**
+
+
+
+### xml
+
+    \Curl\ObjCurl Curl\ObjCurl::xml(\Curl\DOMDocument $doc, string $contentType)
+
+Encode paylod as XML and set Accept- and Content-Type-headers accordingly
+
+
+
+* Visibility: **public**
+* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
+
+
+#### Arguments
+* $doc **Curl\DOMDocument** - &lt;p&gt;XML DOM&lt;/p&gt;
 * $contentType **string**
 
 
@@ -677,28 +771,11 @@ Submit request with PUT method
 
 
 
-### logger
-
-    \Curl\ObjCurl Curl\ObjCurl::logger(\Psr\Log\AbstractLogger $logger)
-
-Set log engine
-
-
-
-* Visibility: **public**
-* This method is defined by [Curl\ObjCurl](Curl-ObjCurl.md)
-
-
-#### Arguments
-* $logger **Psr\Log\AbstractLogger**
-
-
-
 ### id
 
     string Curl\ObjCurl::id()
 
-Unique ID of reques
+Get unique ID of request
 
 
 

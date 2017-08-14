@@ -1,1 +1,52 @@
-{"archive":{"exclude":[".*","*~","vendor/","docs/","Makefile","composer.lock","composer.phar","composer.yaml"]},"homepage":"https://github.com/zurborg/libcurl-objcurl-php","require":{"zurborg/pirate-hooray":"~0.2.2","ext-openssl":"*","ext-curl":"*","php":"~5.6","ext-iconv":"*","ext-intl":"*","sabre/uri":"*"},"authors":[{"email":"zurborg@cpan.org","name":"David Zurborg","homepage":"https://zurborg.github.io/"}],"type":"library","name":"zurborg/curl-objcurl","minimum-stability":"stable","require-dev":{"phpunit/phpunit":"~4","phpdocumentor/phpdocumentor":"~2","evert/phpdoc-md":"~0","squizlabs/php_codesniffer":"~2"},"license":"MIT","autoload":{"psr-0":{"Curl":"src/"}},"keywords":["curl"],"description":"Object-orientated cURL class for PHP"}
+{
+   "autoload" : {
+      "psr-0" : {
+         "Curl" : "src/"
+      }
+   },
+   "keywords" : [
+      "curl"
+   ],
+   "require" : {
+      "ext-iconv" : "*",
+      "ext-intl" : "*",
+      "zurborg/wrap-json" : "dev-php5",
+      "zurborg/pirate-hooray" : "dev-php5",
+      "php" : "~5.6",
+      "sabre/uri" : "*",
+      "ext-xml" : "*",
+      "ext-openssl" : "*",
+      "ext-curl" : "*"
+   },
+   "archive" : {
+      "exclude" : [
+         ".*",
+         "*~",
+         "vendor/",
+         "docs/",
+         "Makefile",
+         "composer.lock",
+         "composer.phar",
+         "composer.yaml"
+      ]
+   },
+   "homepage" : "https://github.com/zurborg/libcurl-objcurl-php",
+   "require-dev" : {
+      "phpunit/phpunit" : "~4",
+      "phpdocumentor/phpdocumentor" : "~2",
+      "evert/phpdoc-md" : "~0",
+      "squizlabs/php_codesniffer" : "~2"
+   },
+   "type" : "library",
+   "authors" : [
+      {
+         "name" : "David Zurborg",
+         "email" : "zurborg@cpan.org",
+         "homepage" : "https://zurborg.github.io/"
+      }
+   ],
+   "license" : "MIT",
+   "minimum-stability" : "stable",
+   "description" : "Object-orientated cURL class for PHP",
+   "name" : "zurborg/curl-objcurl"
+}

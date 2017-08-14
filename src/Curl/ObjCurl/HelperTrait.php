@@ -6,8 +6,8 @@
 
 namespace Curl\ObjCurl;
 
-use \Pirate\Hooray\Str;
-use \Pirate\Hooray\Arr;
+use Pirate\Hooray\Str;
+use Pirate\Hooray\Arr;
 
 /**
  * @internal

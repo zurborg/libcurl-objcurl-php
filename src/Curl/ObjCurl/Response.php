@@ -9,7 +9,12 @@
  */
 namespace Curl\ObjCurl;
 
-use \Pirate\Hooray\Arr;
+use Pirate\Hooray\Arr;
+use Pirate\Hooray\Str;
+use Sabre\Uri;
+use Wrap\JSON;
+use DOMDocument;
+use Psr\Log\AbstractLogger;
 
 /**
  * ObjCurl respsonse class
@@ -42,8 +47,9 @@ class Response
         $this->getinfo = $getinfo;
         $this->headers = $headers;
         $this->payload = $payload;
-        $type = strtolower(trim($this->header('ContentType')));
-        if (preg_match(
+        $type = strtolower(trim($this->header('Content-Type')));
+        if ($match = Str::match(
+            $type,
             '/^
                 (?<type>
                     [^\/]+
@@ -64,9 +70,7 @@ class Response
                     \s*
                     (?<params> .*)
                 )?
-            $/xsi',
-            $type,
-            $match
+            $/xsi'
         )) {
             $this->mime_type = [
                 'type'    => Arr::get($match, 'type'),
@@ -104,6 +108,23 @@ class Response
     }
 
     /**
+     * Checks whether a HTTP status code matches
+     *
+     * ```php
+     * $response->is(200); // matches only code 200
+     * $response->is(30);  // matches 30x (300..309)
+     * $response->is(4);   // matches 4xx (400..499)
+     * ```
+     *
+     * @param  int  $code HTTP status code (1, 2 or 3 digits)
+     * @return bool
+     */
+    public function is($code)
+    {
+        return $code === intval(substr($this->info('http_code'), 0, strlen((string) $code)));
+    }
+
+    /**
      * cURL getinfo
      *
      * @param  string $key
@@ -126,15 +147,48 @@ class Response
     }
 
     /**
+     * Return performance data
+     *
+     * @return float[] execution time of some steps (init, setopt, exec, cleanup)
+     */
+    public function times()
+    {
+        $times = $this->getinfo['times'];
+        $T0 = $times[0];
+        $diffs = [];
+        foreach ($times as $key => $time) {
+            $diffs[$key] = $time - $T0;
+            $T0 = $time;
+        }
+        unset($diffs[0]);
+        return $diffs;
+    }
+
+    /**
+     * Return request URI
+     *
+     * @param string $part `scheme` or `host` or `path` or `port` or `user` or `query` or `fragment`
+     * @return mixed array or scalar
+     */
+    public function url($part = null)
+    {
+        $uri = Uri\parse(Arr::get($this->getinfo, 'url'));
+        if (is_null($part)) {
+            return $uri;
+        } else {
+            return Arr::get($uri, $part);
+        }
+    }
+
+    /**
      * HTTP response header
      *
-     * @param  string $key Fancy name of header field
+     * @param  string $key Name of header field
      * @return string
      */
     public function header($key)
     {
-        $key = self::encodeKey($key);
-        $key = self::decodeKey($key);
+        $key = strtolower($key);
         return Arr::get($this->headers, $key, null);
     }
 
@@ -223,39 +277,65 @@ class Response
         return $this->mimeType() . '/' . $this->mimeSubType();
     }
 
-    protected function _decodeJSON()
+    /**
+     * Decode JSON payload
+     *
+     * @param  bool $assoc convert objects to associative arrays
+     * @throw  \Wrap\JSON\DecodeException
+     * @return mixed|stdClass
+     */
+    public function decodeJSON($assoc = false)
     {
         $json = $this->payload;
 
-        $data = \json_decode($json);
-
-        if (\json_last_error() !== JSON_ERROR_NONE) {
-            $this->objcurl->_log('warning', \json_last_error_msg(), [ 'curl_payload' => $json ]);
-            throw new \Exception(\json_last_error_msg(), \json_last_error());
+        if ($assoc) {
+            return (array) JSON::decodeArray($json);
+        } else {
+            return (object) JSON::decodeObject($json);
         }
-
-        return $data;
     }
 
     /**
-     * Decode payload
+     * Decode XML payload
+     *
+     * @param int $options Bitwise OR of the libxml option constants.
+     *
+     * @return DOMDocument
+     */
+    public function decodeXML($options = 0)
+    {
+        $doc = new DOMDocument();
+        $doc->loadXML($this->payload, $options);
+        return $doc;
+    }
+
+    /**
+     * Decode payload (generic method with auto-detection)
+     *
+     * Currently only JSON is supported.
      *
      * @param  string $default_type
      * @return mixed
      */
     public function decode($default_type = null)
     {
-        $type = $this->contentType() or $default_type;
+        $type = $this->contentType();
+        if (is_null($type)) {
+            $type = $default_type;
+        }
         if (!$type) {
-            throw new \Exception("no mime-type");
+            throw new \RuntimeException("No content type in response header found");
         }
 
         switch (true) {
             case ($type === 'application/json'):
-                return $this->_decodeJSON();
+                return $this->decodeJSON();
+            case ($type === 'application/xml'):
+            case ($type === 'text/xml'):
+                return $this->decodeXML();
         }
 
-        throw new \Exception("unknown mime-type <$type>");
+        throw new \RuntimeException("Unknown content type in response header: $type");
     }
 
     /**
@@ -267,9 +347,69 @@ class Response
     {
         $msg = '';
         foreach ($this->headers as $key => $val) {
-            $msg .= self::encodeKey($key) . self::COL . self::SP . $val . self::EOL;
+            $msg .= $key . self::COL . self::SP . $val . self::EOL;
         }
         $msg .= self::EOL;
         return $msg.$this->payload;
+    }
+
+    /**
+     * Throws this response as an runtime exception
+     *
+     * @param string $reason a well-picked reason why we should throw an exception
+     * @param int $code
+     * @throws \Curl|ObjCurl|Exception
+     */
+    public function raise($reason, $code = 0)
+    {
+        $e = new Exception($reason, $code);
+        $e->Response = $this;
+        throw $e;
+    }
+
+    /**
+     * Log result depending on status code
+     *
+     * @param AbstractLogger $logger A logging instance
+     * @param int $min_level Minimum level of status code (`2` for 2xx, `3` for 3xx, `4` for 4xx, ...)
+     * @return void
+     */
+    public function complain(AbstractLogger $logger, $min_level = 3)
+    {
+        $http_code = Arr::get($this->getinfo, 'http_code', 0);
+
+        if ($http_code < $min_level) {
+            return;
+        }
+
+        $url = Arr::get($this->getinfo, 'url');
+        $message = "Request to $url returned $http_code";
+
+        if ($redirect = Arr::get($this->headers, 'location', null)) {
+            $message .= "\nRedirect to $redirect";
+        }
+
+        $level = 0;
+        switch (intval(substr($http_code, 0, 1))) {
+            case 2:
+                $level = 'info';
+                break;
+            case 3:
+                $level = 'note';
+                break;
+            case 4:
+                $level = 'warning';
+                break;
+            case 5:
+                $level = 'error';
+                break;
+            default:
+                $level = 'critical';
+                break;
+        }
+
+        $logger->log($level, $message);
+
+        return;
     }
 }

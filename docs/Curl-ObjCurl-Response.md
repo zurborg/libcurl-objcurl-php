@@ -50,6 +50,26 @@ $response->status(1) === 2; // status code is 2xx
 
 
 
+### is
+
+    boolean Curl\ObjCurl\Response::is(integer $code)
+
+Checks whether a HTTP status code matches
+
+```php
+$response->is(200); // matches only code 200
+$response->is(30);  // matches 30x (300..309)
+$response->is(4);   // matches 4xx (400..499)
+```
+
+* Visibility: **public**
+
+
+#### Arguments
+* $code **integer** - &lt;p&gt;HTTP status code (1, 2 or 3 digits)&lt;/p&gt;
+
+
+
 ### info
 
     mixed Curl\ObjCurl\Response::info(string $key, mixed $default)
@@ -80,6 +100,35 @@ cURL getinfo
 
 
 
+### times
+
+    array<mixed,float> Curl\ObjCurl\Response::times()
+
+Return performance data
+
+
+
+* Visibility: **public**
+
+
+
+
+### url
+
+    mixed Curl\ObjCurl\Response::url(string $part)
+
+Return request URI
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $part **string** - &lt;p&gt;&lt;code&gt;scheme&lt;/code&gt; or &lt;code&gt;host&lt;/code&gt; or &lt;code&gt;path&lt;/code&gt; or &lt;code&gt;port&lt;/code&gt; or &lt;code&gt;user&lt;/code&gt; or &lt;code&gt;query&lt;/code&gt; or &lt;code&gt;fragment&lt;/code&gt;&lt;/p&gt;
+
+
+
 ### header
 
     string Curl\ObjCurl\Response::header(string $key)
@@ -92,7 +141,7 @@ HTTP response header
 
 
 #### Arguments
-* $key **string** - &lt;p&gt;Fancy name of header field&lt;/p&gt;
+* $key **string** - &lt;p&gt;Name of header field&lt;/p&gt;
 
 
 
@@ -206,13 +255,45 @@ Condensed MIME content type
 
 
 
+### decodeJSON
+
+    mixed|\Curl\ObjCurl\stdClass Curl\ObjCurl\Response::decodeJSON(boolean $assoc)
+
+Decode JSON payload
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $assoc **boolean** - &lt;p&gt;convert objects to associative arrays&lt;/p&gt;
+
+
+
+### decodeXML
+
+    \DOMDocument Curl\ObjCurl\Response::decodeXML(integer $options)
+
+Decode XML payload
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $options **integer** - &lt;p&gt;Bitwise OR of the libxml option constants.&lt;/p&gt;
+
+
+
 ### decode
 
     mixed Curl\ObjCurl\Response::decode(string $default_type)
 
-Decode payload
+Decode payload (generic method with auto-detection)
 
-
+Currently only JSON is supported.
 
 * Visibility: **public**
 
@@ -232,5 +313,39 @@ Returns HTTP response message
 
 * Visibility: **public**
 
+
+
+
+### raise
+
+    mixed Curl\ObjCurl\Response::raise(string $reason, integer $code)
+
+Throws this response as an runtime exception
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $reason **string** - &lt;p&gt;a well-picked reason why we should throw an exception&lt;/p&gt;
+* $code **integer**
+
+
+
+### complain
+
+    void Curl\ObjCurl\Response::complain(\Psr\Log\AbstractLogger $logger, integer $min_level)
+
+Log result depending on status code
+
+
+
+* Visibility: **public**
+
+
+#### Arguments
+* $logger **Psr\Log\AbstractLogger** - &lt;p&gt;A logging instance&lt;/p&gt;
+* $min_level **integer** - &lt;p&gt;Minimum level of status code (&lt;code&gt;2&lt;/code&gt; for 2xx, &lt;code&gt;3&lt;/code&gt; for 3xx, &lt;code&gt;4&lt;/code&gt; for 4xx, ...)&lt;/p&gt;
 
 
