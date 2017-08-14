@@ -763,6 +763,11 @@ class ObjCurl
 
         $T['setopt'] = microtime(true);
 
+        return $this->_finish($curl, $T);
+    }
+
+    protected function _finish($curl, array $T)
+    {
         $payload = curl_exec($curl);
 
         $T['exec'] = microtime(true);

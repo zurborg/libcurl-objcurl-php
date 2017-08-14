@@ -10,6 +10,7 @@
 namespace Curl\ObjCurl;
 
 use Pirate\Hooray\Arr;
+use Pirate\Hooray\Str;
 use Sabre\Uri;
 use Wrap\JSON;
 use DOMDocument;
@@ -47,7 +48,8 @@ class Response
         $this->headers = $headers;
         $this->payload = $payload;
         $type = strtolower(trim($this->header('Content-Type')));
-        if (preg_match(
+        if ($match = Str::match(
+            $type,
             '/^
                 (?<type>
                     [^\/]+
@@ -68,9 +70,7 @@ class Response
                     \s*
                     (?<params> .*)
                 )?
-            $/xsi',
-            $type,
-            $match
+            $/xsi'
         )) {
             $this->mime_type = [
                 'type'    => Arr::get($match, 'type'),
