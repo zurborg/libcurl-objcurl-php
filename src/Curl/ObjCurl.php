@@ -344,7 +344,7 @@ class ObjCurl
      */
     public function host(string $host)
     {
-        $this->url['host'] = idn_to_ascii($host);
+        $this->url['host'] = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46);
         return $this;
     }
 
