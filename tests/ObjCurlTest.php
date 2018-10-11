@@ -181,7 +181,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($curl->__url(), [
             'scheme' => 'scheme',
             'user'  => 'USER',
-            'host'  => 'HOST',
+            'host'  => 'host',
             'port'  => 123,
             'path'  => '/path',
             'query' => 'query',
@@ -191,7 +191,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($curl->__url(), [
             'scheme' => 'scheme',
             'user'  => 'USER',
-            'host'  => 'HOST',
+            'host'  => 'host',
             'port'  => 456,
             'path'  => '/path',
             'query' => 'query',
@@ -201,7 +201,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($curl->__url(), [
             'scheme' => 'scheme',
             'user'  => 'USER',
-            'host'  => 'HOST',
+            'host'  => 'host',
             'port'  => 456,
             'path'  => '/PATH',
             'query' => 'query',
@@ -211,7 +211,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($curl->__url(), [
             'scheme' => 'scheme',
             'user'  => 'USER',
-            'host'  => 'HOST',
+            'host'  => 'host',
             'port'  => 456,
             'path'  => '/PATH',
             'query' => 'query=&foo=bar',
@@ -221,7 +221,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($curl->__url(), [
             'scheme' => 'scheme',
             'user'  => 'USER',
-            'host'  => 'HOST',
+            'host'  => 'host',
             'port'  => 456,
             'path'  => '/PATH',
             'query' => 'query=',
@@ -231,7 +231,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($curl->__url(), [
             'scheme' => 'scheme',
             'user'  => 'USER',
-            'host'  => 'HOST',
+            'host'  => 'host',
             'port'  => 456,
             'path'  => '/PATH',
             'query' => 'query=&foo=123&bar=456',
@@ -241,7 +241,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($curl->__url(), [
             'scheme' => 'scheme',
             'user'  => 'USER',
-            'host'  => 'HOST',
+            'host'  => 'host',
             'port'  => 456,
             'path'  => '/PATH',
             'query' => 'query=&foo=123&bar=456',
