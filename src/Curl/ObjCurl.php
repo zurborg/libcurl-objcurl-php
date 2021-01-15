@@ -61,6 +61,7 @@ class ObjCurl
      * Instanciates a new object
      *
      * @param string $url An URL to connect to
+     * @throws Exception
      */
     public function __construct(string $url = 'http://localhost/')
     {
@@ -95,10 +96,13 @@ class ObjCurl
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     protected static function _initialize()
     {
         if (!extension_loaded('curl')) {
-            throw new \Exception('cURL library is not loaded');
+            throw new Exception('cURL library is not loaded');
         }
 
         self::$version = curl_version();
@@ -106,7 +110,7 @@ class ObjCurl
         $curl_version_string = Arr::get(self::$version, 'version', 0);
         $curl_version_number = Arr::get(self::$version, 'version_number', 0);
         if (self::MIN_CURL_VERSION > $curl_version_number) {
-            throw new \Exception(sprintf('Insufficient version of cURL: %d required, but only %d (v%s) is installed', self::MIN_CURL_VERSION, $curl_version_number, $curl_version_string));
+            throw new Exception(sprintf('Insufficient version of cURL: %d required, but only %d (v%s) is installed', self::MIN_CURL_VERSION, $curl_version_number, $curl_version_string));
         }
 
         $featuremap = Arr::get(self::$version, 'features', chr(0));
@@ -136,6 +140,7 @@ class ObjCurl
      * @param string $param key param
      * @param mixed $default fallback value
      * @return mixed
+     * @throws Exception
      */
     public static function version(string $param = 'version', $default = null)
     {
@@ -151,6 +156,7 @@ class ObjCurl
      * The values in the array are either a version for example or just `true`.
      *
      * @return array
+     * @throws Exception
      */
     public static function features()
     {
@@ -165,13 +171,18 @@ class ObjCurl
         return Arr::get(self::$features, $feature, null);
     }
 
+    /**
+     * @param string $feature
+     * @param $exception
+     * @throws Throwable
+     */
     protected function _require(string $feature, $exception)
     {
         if (!$this->_can($feature)) {
-            if ($exception instanceof \Throwable) {
+            if ($exception instanceof Throwable) {
                 throw $exception;
             } else {
-                throw new \Exception($exception);
+                throw new Exception($exception);
             }
         }
         return;
@@ -186,7 +197,7 @@ class ObjCurl
     protected function _hardopt(string $key, $val)
     {
         if (!$this->_hasopt($key)) {
-            throw new \InvalidArgumentException("Unknown cURL option: $key");
+            throw new InvalidArgumentException("Unknown cURL option: $key");
         }
         $this->options[$key] = $val;
         return;
@@ -306,6 +317,7 @@ class ObjCurl
      * Use SSL (HTTPS)
      *
      * @return self
+     * @throws Throwable
      */
     public function secure()
     {
@@ -378,7 +390,7 @@ class ObjCurl
     /**
      * Set path of URI
      *
-     * @param  string $path
+     * @param string $fragment
      * @return self
      */
     public function fragment(string $fragment)
@@ -757,7 +769,7 @@ class ObjCurl
                 $constant = constant($name);
                 $options[$constant] = $val;
             } else {
-                throw new \InvalidArgumentException("Unknown cURL option: $key (constant: $name)");
+                throw new InvalidArgumentException("Unknown cURL option: $key (constant: $name)");
             }
         }
 
