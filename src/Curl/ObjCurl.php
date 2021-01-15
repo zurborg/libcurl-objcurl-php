@@ -785,9 +785,17 @@ class ObjCurl
             throw new ObjCurl\Exception($curl_error_message, $curl_error_code);
         }
 
-        list($header, $payload) = explode("\r\n\r\n", $payload, 2);
+        $list = explode("\r\n\r\n", $payload, 2);
+        if (count($list) < 2) {
+            $list[1] = null;
+        }
+        list($header, $payload) = $list;
         while (Str::match($header, '/^http\/\d+\.\d+\s+100/i')) {
-            list($header, $payload) = explode("\r\n\r\n", $payload, 2);
+            $list = explode("\r\n\r\n", $payload, 2);
+            if (count($list) < 2) {
+                $list[1] = null;
+            }
+            list($header, $payload) = $list;
         }
         list($status_line, $header) = explode("\r\n", $header, 2);
 
