@@ -9,9 +9,12 @@
  */
 namespace Curl;
 
+use Exception;
+use InvalidArgumentException;
 use Sabre\Uri;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
+use Throwable;
 use Wrap\JSON;
 
 /**
@@ -549,7 +552,7 @@ class ObjCurl
      */
     public function xml(DOMDocument $doc = null, string $contentType = 'application/xml')
     {
-        if (!is_null($data)) {
+        if (!is_null($doc)) {
             $xml = (string) $doc->saveXML();
             $this->contentType($contentType);
             $this->payload($xml);
