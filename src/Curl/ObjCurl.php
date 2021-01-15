@@ -810,6 +810,7 @@ class ObjCurl
         $T['cleanup'] = microtime(true);
 
         $curl_getinfo['times'] = $T;
+        $curl_getinfo['status_line'] = $status_line;
 
         return new ObjCurl\Response($this, $curl_getinfo, $headers, $payload);
     }
