@@ -803,7 +803,8 @@ class ObjCurl
 
         $lower_headers = [];
         foreach ($headers as $key => $val) {
-            $lower_headers[strtolower($key)] = $val;
+            Str::lower($key);
+            $lower_headers[$key] = $val;
         }
         $headers = $lower_headers;
 
