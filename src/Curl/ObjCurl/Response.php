@@ -11,10 +11,10 @@ namespace Curl\ObjCurl;
 
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
+use Psr\Log\LoggerInterface;
 use Sabre\Uri;
 use Wrap\JSON;
 use DOMDocument;
-use Psr\Log\AbstractLogger;
 
 /**
  * ObjCurl respsonse class
@@ -367,11 +367,12 @@ class Response
     /**
      * Log result depending on status code
      *
-     * @param AbstractLogger $logger A logging instance
+     * @param LoggerInterface $logger A logging instance
      * @param int $min_level Minimum level of status code (`2` for 2xx, `3` for 3xx, `4` for 4xx, ...)
+     * @param array $context
      * @return void
      */
-    public function complain(AbstractLogger $logger, int $min_level = 3)
+    public function complain(LoggerInterface $logger, int $min_level = 3, array $context = [])
     {
         $http_code = Arr::get($this->getinfo, 'http_code', 0);
 
@@ -405,7 +406,10 @@ class Response
                 break;
         }
 
-        $logger->log($level, $message);
+        Arr::init($context, 'http_code', $http_code);
+        Arr::init($context, 'url', $url);
+
+        $logger->log($level, $message, $context);
 
         return;
     }
