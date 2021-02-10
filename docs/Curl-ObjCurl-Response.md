@@ -335,7 +335,7 @@ Throws this response as an runtime exception
 
 ### complain
 
-    void Curl\ObjCurl\Response::complain(\Psr\Log\AbstractLogger $logger, integer $min_level)
+    void Curl\ObjCurl\Response::complain(\Psr\Log\LoggerInterface $logger, integer $min_level, array $context)
 
 Log result depending on status code
 
@@ -345,7 +345,8 @@ Log result depending on status code
 
 
 #### Arguments
-* $logger **Psr\Log\AbstractLogger** - &lt;p&gt;A logging instance&lt;/p&gt;
+* $logger **Psr\Log\LoggerInterface** - &lt;p&gt;A logging instance&lt;/p&gt;
 * $min_level **integer** - &lt;p&gt;Minimum level of status code (&lt;code&gt;2&lt;/code&gt; for 2xx, &lt;code&gt;3&lt;/code&gt; for 3xx, &lt;code&gt;4&lt;/code&gt; for 4xx, ...)&lt;/p&gt;
+* $context **array**
 
 
