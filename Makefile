@@ -1,11 +1,11 @@
 php=php
 perl=perl
-composer=$(php) composer.phar
-phpcs=$(php) vendor/squizlabs/php_codesniffer/scripts/phpcs
+composer=composer
+phpcs=$(php) vendor/squizlabs/php_codesniffer/bin/phpcs
 phpunit=$(php) vendor/phpunit/phpunit/phpunit
 phpdoc=$(php) vendor/phpdocumentor/phpdocumentor/bin/phpdoc
 phpdocmd=$(php) vendor/evert/phpdoc-md/bin/phpdocmd
-yaml2json=$(perl) -MJSON -MYAML -eprint -e'to_json(YAML::Load(join""=><>),{pretty=>1})'
+yaml2json=$(perl) -MJSON -MYAML -eprint -e'to_json(YAML::Load(join""=><>),{pretty=>1,canonical=>1})'
 getversion=$(perl) -MYAML -eprint -e'YAML::Load(join""=><>)->{version}'
 V=`$(getversion) < composer.yaml`
 
@@ -25,16 +25,14 @@ docs:
 	git clean -xdf docs
 
 clean:
-	git clean -xdf -e composer.phar -e vendor
+	git clean -xdf -e vendor
 
 vendor: composer.json
 	$(composer) --prefer-dist install >composer.out
 
 composer.json: composer.yaml
-	$(yaml2json) < $< > $@~
-	mv $@~ $@
-	-rm composer.lock
-	git add $@
+	$(yaml2json) < $? > $@
+	git add -v -- $@
 
 test: lint
 	$(phpcs) --warning-severity=0 --standard=PSR2 src
