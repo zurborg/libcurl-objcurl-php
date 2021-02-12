@@ -718,4 +718,38 @@ class ObjCurlTest extends TestCase
         $data = $resp->decode();
         $this->assertInstanceOf(DOMDocument::class, $data);
     }
+
+    /**
+     * @throws Throwable
+     */
+    public function test024()
+    {
+        $curl = $this->curl();
+        $curl->path('/cookie.php');
+        $T0 = DateTimeImmutable::createFromFormat('U', 0);
+        $T1 = DateTimeImmutable::createFromFormat('U', 1);
+        $TN = DateTimeImmutable::createFromFormat('U', 0x10000);
+        $curl->cookie('foo', JSON::encode([123, $TN->format('U'), '/path', 'abc.xyz', true, true]));
+        $curl->cookie('bar', '');
+        $resp = $curl->get();
+        $this->assertEquals(
+            [
+                'foo' => [
+                    'value'    => '123',
+                    'max-age'  => '0',
+                    'path'     => '/path',
+                    'domain'   => 'abc.xyz',
+                    'secure'   => true,
+                    'httponly' => true,
+                    'expires'  => $TN,
+                ],
+                'bar' => [
+                    'value'   => 'deleted',
+                    'max-age' => '0',
+                    'expires' => $T1,
+                ],
+            ],
+            $resp->cookies()
+        );
+    }
 }

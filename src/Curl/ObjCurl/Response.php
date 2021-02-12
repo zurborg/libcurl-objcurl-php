@@ -41,6 +41,7 @@ class Response
     protected ?string $payload;
     protected array $mime_type = [];
     protected string $ID;
+    protected array $cookies = [];
 
     /**
      * @param ObjCurl $objcurl
@@ -88,6 +89,82 @@ class Response
                 'suffix'  => Arr::get($match, 'suffix'),
                 'params'  => Arr::get($match, 'params'),
             ];
+        }
+
+        $raw_cookies = $this->headers('set-cookie');
+
+        $this->cookies = [];
+
+        $cookie_re = '
+            \s*
+            (?<name> \S+ )
+            \s*
+            =
+            \s*
+            (?<value>
+                ([0-9a-z+]|%[0-9a-f]{2})+
+            )
+            \s*
+            ;?
+
+            (
+                \s*
+                expires
+                \s*
+                =
+                (?<expires> .+? )
+                \s*
+                ;?
+            )?
+
+            (
+                \s*
+                expires
+                \s*
+                =
+                (?<expires> .+? )
+                \s*
+                ;?
+            )?
+            \s*
+        ';
+
+        foreach ($raw_cookies as $raw_cookie) {
+            $opts = [];
+            $parts = explode(';', $raw_cookie);
+            if ($parts === false) {
+                continue;
+            }
+
+            $kv = Arr::shift($parts);
+            $pair = explode('=', $kv, 2);
+            if (count($pair) !== 2) {
+                continue;
+            }
+
+            [$key, $value] = $pair;
+            $name = trim($key);
+            $opts['value'] = urldecode(trim($value));
+
+            foreach ($parts as $part) {
+                $pair = explode('=', $part, 2);
+                if (count($pair) === 1) {
+                    $opts[strtolower(trim($pair[0]))] = true;
+                } elseif (count($pair) === 2) {
+                    [$key, $value] = $pair;
+                    $opts[strtolower(trim($key))] = trim($value);
+                }
+            }
+
+            if ($expires = Arr::consume($opts, 'expires')) {
+                try {
+                    $opts['expires'] = new \DateTimeImmutable($expires);
+                } catch (\Exception $e) {
+                    $opts['expires'] = $e;
+                }
+            }
+
+            $this->cookies[$name] = $opts;
         }
     }
 
@@ -200,6 +277,19 @@ class Response
     {
         $key = strtolower($key);
         return Arr::get($this->headers, $key, null);
+    }
+
+    /**
+     * HTTP response headers
+     *
+     * @param string $key Name of header field
+     * @return array
+     */
+    public function headers(string $key): array
+    {
+        $key = strtolower($key);
+        $value = Arr::get($this->headers, $key, null);
+        return is_array($value) ? $value : [$value];
     }
 
     /**
@@ -419,5 +509,22 @@ class Response
         Arr::init($context, 'url', $url);
 
         $logger->log($level, $message, $context);
+    }
+
+    /**
+     * @return array
+     */
+    public function cookies(): array
+    {
+        return $this->cookies;
+    }
+
+    /**
+     * @param string $name
+     * @return null|array
+     */
+    public function cookie(string $name)
+    {
+        return Arr::get($this->cookies, $name);
     }
 }
