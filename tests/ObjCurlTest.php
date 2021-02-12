@@ -1,32 +1,44 @@
 <?php
 
-namespace Curl;
-
+use Curl\ObjCurl;
+use PHPUnit\Framework\TestCase;
 use Pirate\Hooray\Arr;
 use Wrap\JSON;
-use PHPUnit_Framework_TestCase;
 
-class ObjCurlDump extends ObjCurl {
-    public function __url() {
+class ObjCurlDump extends ObjCurl
+{
+    public function __url()
+    {
         return $this->url;
     }
-    public function __options() {
+
+    public function __options()
+    {
         return $this->options;
     }
-    public function __headers() {
+
+    public function __headers()
+    {
         return $this->headers;
     }
-    public function __payload() {
+
+    public function __payload()
+    {
         return $this->payload;
     }
 }
 
-class ObjCurlTest extends PHPUnit_Framework_TestCase
+class ObjCurlTest extends TestCase
 {
-    private function arrsert(array $array, $key, $val) {
-        return $this->assertSame($val, Arr::get($array, $key));
+    private function arrsert(array $array, $key, $val)
+    {
+        $this->assertSame($val, Arr::get($array, $key));
     }
 
+    /**
+     * @return ObjCurlDump
+     * @throws Throwable
+     */
     private function curl()
     {
         $url = getenv('TEST_URL');
@@ -43,290 +55,388 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         return JSON::decodeArray($resp->payload());
     }
 
-    public function test001() {
+    /**
+     * @throws Throwable
+     */
+    public function test001()
+    {
         $curl = new ObjCurlDump('foobar');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => null,
-            'user'  => null,
-            'host'  => null,
-            'port'  => null,
-            'path'  => 'foobar',
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => null,
+                'user'     => null,
+                'host'     => null,
+                'port'     => null,
+                'path'     => 'foobar',
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl = new ObjCurlDump('scheme://user@host:123/path?query#fragment');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'user',
-            'host'  => 'host',
-            'port'  => 123,
-            'path'  => '/path',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'user',
+                'host'     => 'host',
+                'port'     => 123,
+                'path'     => '/path',
+                'query'    => 'query',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl = new ObjCurlDump('foo:123');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => null,
-            'user'  => null,
-            'host'  => 'foo',
-            'port'  => 123,
-            'path'  => null,
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => null,
+                'user'     => null,
+                'host'     => 'foo',
+                'port'     => 123,
+                'path'     => null,
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl = new ObjCurlDump('foo/bar');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => null,
-            'user'  => null,
-            'host'  => null,
-            'port'  => null,
-            'path'  => 'foo/bar',
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => null,
+                'user'     => null,
+                'host'     => null,
+                'port'     => null,
+                'path'     => 'foo/bar',
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl = new ObjCurlDump('foo@bar');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => null,
-            'user'  => null,
-            'host'  => null,
-            'port'  => null,
-            'path'  => 'foo@bar',
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => null,
+                'user'     => null,
+                'host'     => null,
+                'port'     => null,
+                'path'     => 'foo@bar',
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl = new ObjCurlDump('foo?bar');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => null,
-            'user'  => null,
-            'host'  => null,
-            'port'  => null,
-            'path'  => 'foo',
-            'query' => 'bar',
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => null,
+                'user'     => null,
+                'host'     => null,
+                'port'     => null,
+                'path'     => 'foo',
+                'query'    => 'bar',
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl = new ObjCurlDump('foo#bar');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => null,
-            'user'  => null,
-            'host'  => null,
-            'port'  => null,
-            'path'  => 'foo',
-            'query' => null,
-            'fragment' => 'bar',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => null,
+                'user'     => null,
+                'host'     => null,
+                'port'     => null,
+                'path'     => 'foo',
+                'query'    => null,
+                'fragment' => 'bar',
+            ],
+            $curl->__url()
+        );
         $curl = new ObjCurlDump('http://localhost/');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'http',
-            'host'  => 'localhost',
-            'path'  => '/',
-            'port'  => null,
-            'user'  => null,
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'http',
+                'host'     => 'localhost',
+                'path'     => '/',
+                'port'     => null,
+                'user'     => null,
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl->secure();
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'https',
-            'host'  => 'localhost',
-            'path'  => '/',
-            'port'  => null,
-            'user'  => null,
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'https',
+                'host'     => 'localhost',
+                'path'     => '/',
+                'port'     => null,
+                'user'     => null,
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl->insecure();
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'http',
-            'host'  => 'localhost',
-            'path'  => '/',
-            'port'  => null,
-            'user'  => null,
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'http',
+                'host'     => 'localhost',
+                'path'     => '/',
+                'port'     => null,
+                'user'     => null,
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
     }
 
-    public function test002() {
+    /**
+     * @throws Throwable
+     */
+    public function test002()
+    {
         $curl = new ObjCurlDump();
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'http',
-            'user'  => null,
-            'host'  => 'localhost',
-            'port'  => null,
-            'path'  => '/',
-            'query' => null,
-            'fragment' => null,
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'http',
+                'user'     => null,
+                'host'     => 'localhost',
+                'port'     => null,
+                'path'     => '/',
+                'query'    => null,
+                'fragment' => null,
+            ],
+            $curl->__url()
+        );
         $curl->url('scheme://user@host:123/path?query#fragment');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'user',
-            'host'  => 'host',
-            'port'  => 123,
-            'path'  => '/path',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'user',
+                'host'     => 'host',
+                'port'     => 123,
+                'path'     => '/path',
+                'query'    => 'query',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl->user('USER');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 123,
-            'path'  => '/path',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 123,
+                'path'     => '/path',
+                'query'    => 'query',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl->host('HOST');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 123,
-            'path'  => '/path',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 123,
+                'path'     => '/path',
+                'query'    => 'query',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl->port(456);
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 456,
-            'path'  => '/path',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 456,
+                'path'     => '/path',
+                'query'    => 'query',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl->path('/PATH');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 456,
-            'path'  => '/PATH',
-            'query' => 'query',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 456,
+                'path'     => '/PATH',
+                'query'    => 'query',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl->query('foo', 'bar');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 456,
-            'path'  => '/PATH',
-            'query' => 'query=&foo=bar',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 456,
+                'path'     => '/PATH',
+                'query'    => 'query=&foo=bar',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl->query('foo');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 456,
-            'path'  => '/PATH',
-            'query' => 'query=',
-            'fragment' => 'fragment',
-        ]);
-        $curl->queries(['foo'=>123,'bar'=>456]);
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 456,
-            'path'  => '/PATH',
-            'query' => 'query=&foo=123&bar=456',
-            'fragment' => 'fragment',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 456,
+                'path'     => '/PATH',
+                'query'    => 'query=',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
+        $curl->queries(['foo' => 123, 'bar' => 456]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 456,
+                'path'     => '/PATH',
+                'query'    => 'query=&foo=123&bar=456',
+                'fragment' => 'fragment',
+            ],
+            $curl->__url()
+        );
         $curl->fragment('FRAGMENT');
-        $this->assertEquals($curl->__url(), [
-            'scheme' => 'scheme',
-            'user'  => 'USER',
-            'host'  => 'host',
-            'port'  => 456,
-            'path'  => '/PATH',
-            'query' => 'query=&foo=123&bar=456',
-            'fragment' => 'FRAGMENT',
-        ]);
+        $this->assertEquals(
+            [
+                'scheme'   => 'scheme',
+                'user'     => 'USER',
+                'host'     => 'host',
+                'port'     => 456,
+                'path'     => '/PATH',
+                'query'    => 'query=&foo=123&bar=456',
+                'fragment' => 'FRAGMENT',
+            ],
+            $curl->__url()
+        );
     }
 
-    public function test003() {
+    public function test003()
+    {
         $curl = new ObjCurlDump();
         $O = $curl->__options();
         $this->arrsert($O, 'useragent', ObjCurlDump::USER_AGENT);
     }
 
-    public function test004() {
+    public function test004()
+    {
         $curl = new ObjCurlDump();
 
         $curl->header('Foo', 123);
-        $this->assertSame($curl->__headers(), [
-            'foo' => 'foo: 123',
-        ]);
+        $this->assertSame(
+            $curl->__headers(),
+            [
+                'foo' => 'foo: 123',
+            ]
+        );
 
         $curl->header('Foo');
-        $this->assertSame($curl->__headers(), [
-        ]);
+        $this->assertSame(
+            $curl->__headers(),
+            [
+            ]
+        );
 
         $curl->header('FOO', 123);
-        $this->assertSame($curl->__headers(), [
-            'foo' => 'foo: 123',
-        ]);
+        $this->assertSame(
+            $curl->__headers(),
+            [
+                'foo' => 'foo: 123',
+            ]
+        );
 
         $curl->header('x-bar', 456);
-        $this->assertSame($curl->__headers(), [
-            'foo'   => 'foo: 123',
-            'x-bar' => 'x-bar: 456',
-        ]);
+        $this->assertSame(
+            $curl->__headers(),
+            [
+                'foo'   => 'foo: 123',
+                'x-bar' => 'x-bar: 456',
+            ]
+        );
 
-        $curl->headers(['abc'=>'def','ghi'=>'jkl']);
-        $this->assertSame($curl->__headers(), [
-            'foo'   => 'foo: 123',
-            'x-bar' => 'x-bar: 456',
-            'abc'   => 'abc: def',
-            'ghi'   => 'ghi: jkl',
-        ]);
+        $curl->headers(['abc' => 'def', 'ghi' => 'jkl']);
+        $this->assertSame(
+            $curl->__headers(),
+            [
+                'foo'   => 'foo: 123',
+                'x-bar' => 'x-bar: 456',
+                'abc'   => 'abc: def',
+                'ghi'   => 'ghi: jkl',
+            ]
+        );
     }
 
-    public function test005() {
+    public function test005()
+    {
         $curl = new ObjCurlDump();
 
         $curl->accept('foobar');
-        $this->assertSame($curl->__headers(), [
-            'accept' => 'accept: foobar',
-        ]);
+        $this->assertSame(
+            $curl->__headers(),
+            [
+                'accept' => 'accept: foobar',
+            ]
+        );
 
         $curl->contentType('foo/bar');
-        $this->assertSame($curl->__headers(), [
-            'accept' => 'accept: foobar',
-            'content-type' => 'content-type: foo/bar',
-        ]);
+        $this->assertSame(
+            $curl->__headers(),
+            [
+                'accept'       => 'accept: foobar',
+                'content-type' => 'content-type: foo/bar',
+            ]
+        );
     }
 
-    public function test006() {
+    public function test006()
+    {
         $curl = new ObjCurlDump();
 
         $curl->payload('foobar');
         $this->assertSame($curl->__payload(), 'foobar');
 
-        $curl->payload((array)['foo'=>'bar']);
+        $curl->payload((array) ['foo' => 'bar']);
         $this->assertSame($curl->__payload(), 'foo=bar');
 
-        $curl->payload((object)['foo'=>'bar']);
+        $curl->payload((object) ['foo' => 'bar']);
         $this->assertSame($curl->__payload(), 'foo=bar');
 
-        $curl->form(['foo'=>'bar']);
+        $curl->form(['foo' => 'bar']);
         $this->assertSame($curl->__payload(), 'foo=bar');
 
-        $curl->multiform(['foo'=>'bar']);
-        $this->assertSame($curl->__payload(), ['foo'=>'bar']);
+        $curl->multiform(['foo' => 'bar']);
+        $this->assertSame($curl->__payload(), ['foo' => 'bar']);
 
     }
 
-    private function assertPath(array $array, $path, $value) {
-        return $this->assertSame($value, Arr::getPath($array, $path), $path);
+    private function assertPath(array $array, $path, $value)
+    {
+        $this->assertSame($value, Arr::getPath($array, $path), $path);
     }
 
-    public function test007get() {
+    /**
+     * @throws Throwable
+     */
+    public function test007get()
+    {
         $curl = $this->curl();
         $resp = $curl->get();
         $this->assertSame(200, $resp->status(), "HTTP Status");
@@ -334,7 +444,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/REQUEST_METHOD', 'GET');
     }
 
-    public function test007post() {
+    /**
+     * @throws Throwable
+     */
+    public function test007post()
+    {
         $curl = $this->curl();
         $resp = $curl->post();
         $this->assertSame(200, $resp->status(), "HTTP Status");
@@ -342,7 +456,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/REQUEST_METHOD', 'POST');
     }
 
-    public function test007put() {
+    /**
+     * @throws Throwable
+     */
+    public function test007put()
+    {
         $curl = $this->curl();
         $resp = $curl->put();
         $this->assertSame(200, $resp->status(), "HTTP Status");
@@ -350,7 +468,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/REQUEST_METHOD', 'PUT');
     }
 
-    public function test007patch() {
+    /**
+     * @throws Throwable
+     */
+    public function test007patch()
+    {
         $curl = $this->curl();
         $resp = $curl->patch();
         $this->assertSame(200, $resp->status(), "HTTP Status");
@@ -358,7 +480,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/REQUEST_METHOD', 'PATCH');
     }
 
-    public function test007delete() {
+    /**
+     * @throws Throwable
+     */
+    public function test007delete()
+    {
         $curl = $this->curl();
         $resp = $curl->delete();
         $this->assertSame(200, $resp->status(), "HTTP Status");
@@ -366,13 +492,21 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/REQUEST_METHOD', 'DELETE');
     }
 
-    public function test007head() {
+    /**
+     * @throws Throwable
+     */
+    public function test007head()
+    {
         $curl = $this->curl();
         $resp = $curl->head();
         $this->assertSame(200, $resp->status(), "HTTP Status");
     }
 
-    public function test008() {
+    /**
+     * @throws Throwable
+     */
+    public function test008()
+    {
         $curl = $this->curl();
         $curl->header('X-Foo-Bar', 123456);
         $resp = $curl->get();
@@ -381,7 +515,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/HTTP_X_FOO_BAR', '123456');
     }
 
-    public function test009() {
+    /**
+     * @throws Throwable
+     */
+    public function test009()
+    {
         $curl = $this->curl();
         $curl->query('foobar', 123456);
         $resp = $curl->get();
@@ -390,7 +528,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/GET/foobar', '123456');
     }
 
-    public function test010() {
+    /**
+     * @throws Throwable
+     */
+    public function test010()
+    {
         $curl = $this->curl();
         $curl->form(['foobar' => 123456]);
         $resp = $curl->post();
@@ -401,7 +543,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/POST/foobar', '123456');
     }
 
-    public function test011() {
+    /**
+     * @throws Throwable
+     */
+    public function test011()
+    {
         $curl = $this->curl();
         $curl->payload('&=["?');
         $curl->contentType('text/plain');
@@ -412,7 +558,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/input', '&=["?');
     }
 
-    public function test012() {
+    /**
+     * @throws Throwable
+     */
+    public function test012()
+    {
         $curl = $this->curl();
         $curl->referer('http://google.com');
         $resp = $curl->get();
@@ -421,7 +571,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/HTTP_REFERER', 'http://google.com');
     }
 
-    public function test013() {
+    /**
+     * @throws Throwable
+     */
+    public function test013()
+    {
         $curl = $this->curl();
         $curl->basicAuth('foo', 'bar');
         $resp = $curl->get();
@@ -431,7 +585,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/SERVER/PHP_AUTH_PW', 'bar');
     }
 
-    public function test014() {
+    /**
+     * @throws Throwable
+     */
+    public function test014()
+    {
         $curl = $this->curl();
         $curl->cookie('foo', 'bar');
         $resp = $curl->get();
@@ -440,7 +598,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertPath($data, '/COOKIE/foo', 'bar');
     }
 
-    public function test015() {
+    /**
+     * @throws Throwable
+     */
+    public function test015()
+    {
         $curl = $this->curl();
         $curl->path('/mimetype.php');
         $resp = $curl->post();
@@ -456,18 +618,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertSame(false, $resp->contentType('major', 'bad'));
     }
 
-    public function test016() {
-        $curl = $this->curl();
-        $resp = $curl->get();
-        $this->assertSame($curl->id(), $resp->id());
-        $uuid = $curl->id();
-        $resp = $curl->get();
-        $this->assertSame($curl->id(), $resp->id());
-        $this->assertNotSame($uuid, $resp->id());
-        $this->assertNotSame($uuid, $curl->id());
-    }
-
-    public function test017() {
+    /**
+     * @throws Throwable
+     */
+    public function test017()
+    {
         $curl = $this->curl();
         $curl->path('/error.php');
         $curl->query('code', 444);
@@ -480,28 +635,36 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Curl\ObjCurl\Exception
-     * @expectedExceptionCode 6
-     * @expectedExceptionMessageRegExp /could.+resolve.+host.+nonexistent\.nodomain/i
+     * @throws Throwable
      */
-    public function test018() {
+    public function test018()
+    {
+        $this->expectException(\Curl\ObjCurl\Exception::class);
+        $this->expectExceptionCode(6);
+        $this->expectExceptionMessageMatches("/could.+resolve.+host.+nonexistent\.nodomain/i");
         $curl = $this->curl();
         $curl->host('nonexistent.nodomain');
         $curl->get();
     }
 
     /**
-     * @expectedException Curl\ObjCurl\Exception
-     * @expectedExceptionCode 123
-     * @expectedExceptionMessage meh
+     * @throws Throwable
      */
-    public function test019() {
+    public function test019()
+    {
+        $this->expectExceptionMessage("meh");
+        $this->expectException(\Curl\ObjCurl\Exception::class);
+        $this->expectExceptionCode(123);
         $curl = $this->curl();
         $resp = $curl->get();
         $resp->raise('meh', 123);
     }
 
-    public function test020() {
+    /**
+     * @throws Throwable
+     */
+    public function test020()
+    {
         $curl = $this->curl();
         $resp = $curl->get();
         $times = $resp->times();
@@ -511,7 +674,11 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertGreaterThan(0, Arr::get($times, 'cleanup'));
     }
 
-    public function test021() {
+    /**
+     * @throws Throwable
+     */
+    public function test021()
+    {
         $curl = $this->curl();
         $resp = $curl->get();
         $this->assertSame(true, $resp->is(200));
@@ -522,27 +689,33 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertSame(false, $resp->is(3));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function test022()
     {
         $curl = $this->curl();
         $curl->path('/json.php');
         $resp = $curl->get();
         $data = $resp->decodeJSON(true);
-        $this->assertInternalType('array', $data);
+        $this->assertIsArray($data);
         $data = $resp->decodeJSON(false);
         $this->assertInstanceOf(\stdClass::class, $data);
         $data = $resp->decode();
         $this->assertInstanceOf(\stdClass::class, $data);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function test023()
     {
         $curl = $this->curl();
         $curl->path('/xml.php');
         $resp = $curl->get();
         $data = $resp->decodeXML();
-        $this->assertInstanceOf(\DOMDocument::class, $data);
+        $this->assertInstanceOf(DOMDocument::class, $data);
         $data = $resp->decode();
-        $this->assertInstanceOf(\DOMDocument::class, $data);
+        $this->assertInstanceOf(DOMDocument::class, $data);
     }
 }
