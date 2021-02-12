@@ -436,6 +436,36 @@ class Response
     }
 
     /**
+     * Get all cookies
+     *
+     * @return array
+     */
+    public function cookies(): array
+    {
+        return $this->cookies;
+    }
+
+    /**
+     * Get a cookie
+     *
+     * Returns null when cookie not found
+     * Returns string when cookie is found and $verbose is false
+     * Returns array when cookie is found and $verbose is true
+     *
+     * @param string $name
+     * @param bool $verbose
+     * @return null|string|array
+     */
+    public function cookie(string $name, bool $verbose = false)
+    {
+        $cookie = Arr::get($this->cookies, $name);
+        if (is_null($cookie) or $verbose) {
+            return $cookie;
+        }
+        return Arr::get($cookie, 'value');
+    }
+
+    /**
      * Returns HTTP response message
      *
      * @return string
@@ -509,22 +539,5 @@ class Response
         Arr::init($context, 'url', $url);
 
         $logger->log($level, $message, $context);
-    }
-
-    /**
-     * @return array
-     */
-    public function cookies(): array
-    {
-        return $this->cookies;
-    }
-
-    /**
-     * @param string $name
-     * @return null|array
-     */
-    public function cookie(string $name)
-    {
-        return Arr::get($this->cookies, $name);
     }
 }

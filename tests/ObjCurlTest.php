@@ -751,5 +751,21 @@ class ObjCurlTest extends TestCase
             ],
             $resp->cookies()
         );
+        $this->assertSame('123', $resp->cookie('foo'));
+        $this->assertSame('deleted', $resp->cookie('bar'));
+        $this->assertNull($resp->cookie('xxx', true));
+        $this->assertNull($resp->cookie('xxx', false));
+        $this->assertEquals(
+            [
+                'value'    => '123',
+                'max-age'  => '0',
+                'path'     => '/path',
+                'domain'   => 'abc.xyz',
+                'secure'   => true,
+                'httponly' => true,
+                'expires'  => $TN,
+            ],
+            $resp->cookie('foo', true)
+        );
     }
 }
