@@ -2,18 +2,21 @@
 /**
  * Object-orientated cURL class for PHP
  *
- * @copyright 2016 David Zurborg
+ * @copyright 2021 David Zurborg
  * @author    David Zurborg <zurborg@cpan.org>
  * @link      https://github.com/zurborg/libcurl-objcurl-php
  * @license   https://opensource.org/licenses/MIT The MIT License
  */
+
 namespace Curl;
 
+use Curl\ObjCurl\Response;
+use DOMDocument;
 use Exception;
 use InvalidArgumentException;
-use Sabre\Uri;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
+use Sabre\Uri;
 use Throwable;
 use Wrap\JSON;
 
@@ -27,9 +30,10 @@ class ObjCurl
 
     const DEFAULT_TIMEOUT = 30;
 
-    const MIN_CURL_VERSION = 65536 *   7 // major
-                           +   256 *  22 // minor
-                           +     1 *   0 // patch
+    const MIN_CURL_VERSION = 0
+        + 0x10000 *  7  // major
+        + 0x100   * 22  // minor
+        + 0x1     *  0  // patch
     ;
 
     const FEATURES = [
@@ -39,23 +43,24 @@ class ObjCurl
         'libz',
     ];
 
-    use ObjCurl\HelperTrait;
+    protected static bool $initialized = false;
+    protected static array $version = [];
+    protected static array $features = [];
 
-    protected static $initialized = false;
-    protected static $version = [];
-    protected static $features = [];
+    protected ?string $method = null;
+    protected array $url = [];
+    protected array $options = [];
+    protected array $headers = [];
+    protected array $query = [];
+    protected ?string $basic_auth_user = null;
+    protected ?string $basic_auth_pass = null;
+    protected ?string $referer = null;
+    protected array $cookies = [];
 
-    protected $method;
-    protected $url = [];
-    protected $options = [];
-    protected $headers = [];
-    protected $query = [];
-    protected $basic_auth_user;
-    protected $basic_auth_pass;
-    protected $payload;
-    protected $referer;
-    protected $cookies = [];
-    protected $ID;
+    /**
+     * @var array|object|string
+     */
+    protected $payload = null;
 
     /**
      * Instanciates a new object
@@ -66,9 +71,9 @@ class ObjCurl
     public function __construct(string $url = 'http://localhost/')
     {
         if (!self::$initialized) {
-             self::_initialize();
+            self::_initialize();
         }
- 
+
         $this->url($url);
 
         $this->reset();
@@ -79,27 +84,29 @@ class ObjCurl
      *
      * @return self
      */
-    public function reset()
+    public function reset(): self
     {
         $this->timeout(self::DEFAULT_TIMEOUT);
-        $this->_init([
-            'header'          => true,
-            'returntransfer'  => true,
-            'useragent'       => self::USER_AGENT,
-            'encoding'        => '',
-            'autoreferer'     => true,
-            'crlf'            => true,
-            'followlocation'  => false,
-            'pipewait'        => true,
-            'safe_upload'     => true,
-        ]);
+        $this->_init(
+            [
+                'header' => true,
+                'returntransfer' => true,
+                'useragent' => self::USER_AGENT,
+                'encoding' => '',
+                'autoreferer' => true,
+                'crlf' => true,
+                'followlocation' => false,
+                'pipewait' => true,
+                'safe_upload' => true,
+            ]
+        );
         return $this;
     }
 
     /**
      * @throws Exception
      */
-    protected static function _initialize()
+    protected static function _initialize(): void
     {
         if (!extension_loaded('curl')) {
             throw new Exception('cURL library is not loaded');
@@ -110,24 +117,29 @@ class ObjCurl
         $curl_version_string = Arr::get(self::$version, 'version', 0);
         $curl_version_number = Arr::get(self::$version, 'version_number', 0);
         if (self::MIN_CURL_VERSION > $curl_version_number) {
-            throw new Exception(sprintf('Insufficient version of cURL: %d required, but only %d (v%s) is installed', self::MIN_CURL_VERSION, $curl_version_number, $curl_version_string));
+            throw new Exception(
+                sprintf(
+                    'Insufficient version of cURL: %d required, but only %d (v%s) is installed',
+                    self::MIN_CURL_VERSION,
+                    $curl_version_number,
+                    $curl_version_string
+                )
+            );
         }
 
         $featuremap = Arr::get(self::$version, 'features', chr(0));
 
         self::$features = [];
         foreach (self::FEATURES as $feature) {
-            $constant = 'CURL_VERSION_'.strtoupper($feature);
+            $constant = 'CURL_VERSION_' . strtoupper($feature);
             if ($featuremap & constant($constant)) {
-                self::$features[$feature] = Arr::get(self::$version, $feature.'_version', true);
+                self::$features[$feature] = Arr::get(self::$version, $feature . '_version', true);
             } else {
                 self::$features[$feature] = false;
             }
         }
 
         self::$initialized = true;
-
-        return;
     }
 
     /**
@@ -145,7 +157,7 @@ class ObjCurl
     public static function version(string $param = 'version', $default = null)
     {
         if (!self::$initialized) {
-             self::_initialize();
+            self::_initialize();
         }
         return Arr::get(self::$version, $param, $default);
     }
@@ -158,10 +170,10 @@ class ObjCurl
      * @return array
      * @throws Exception
      */
-    public static function features()
+    public static function features(): array
     {
         if (!self::$initialized) {
-             self::_initialize();
+            self::_initialize();
         }
         return self::$features;
     }
@@ -176,7 +188,7 @@ class ObjCurl
      * @param $exception
      * @throws Throwable
      */
-    protected function _require(string $feature, $exception)
+    protected function _require(string $feature, $exception): void
     {
         if (!$this->_can($feature)) {
             if ($exception instanceof Throwable) {
@@ -185,25 +197,23 @@ class ObjCurl
                 throw new Exception($exception);
             }
         }
-        return;
     }
 
-    protected function _hasopt(string $key)
+    protected function _hasopt(string $key): bool
     {
         $name = strtoupper('curlopt_' . $key);
         return defined($name);
     }
 
-    protected function _hardopt(string $key, $val)
+    protected function _hardopt(string $key, $val): void
     {
         if (!$this->_hasopt($key)) {
             throw new InvalidArgumentException("Unknown cURL option: $key");
         }
         $this->options[$key] = $val;
-        return;
     }
 
-    protected function _softopt(string $key, $val)
+    protected function _softopt(string $key, $val): bool
     {
         if ($this->_hasopt($key)) {
             $this->options[$key] = $val;
@@ -213,13 +223,12 @@ class ObjCurl
         }
     }
 
-    protected function _init(array $options)
+    protected function _init(array $options): void
     {
         $this->options = [];
         foreach ($options as $key => $val) {
             $this->_softopt($key, $val);
         }
-        return;
     }
 
     /**
@@ -238,11 +247,11 @@ class ObjCurl
      * String options:
      * + `cipher_list` (but see also `ciphers` method below)
      *
-     * @param  string $key Name
-     * @param  mixed  $val Value
+     * @param string $key Name
+     * @param mixed $val Value
      * @return self
      */
-    public function sslopt(string $key, $val)
+    public function sslopt(string $key, $val): self
     {
         $this->_hardopt("ssl_$key", $val);
         return $this;
@@ -255,10 +264,10 @@ class ObjCurl
      * $objcurl->ciphers(['RSA+AES', 'ECDHE+AES'])
      * ```
      *
-     * @param  string[] $list List of ciphers
+     * @param string[] $list List of ciphers
      * @return self
      */
-    public function ciphers(array $list)
+    public function ciphers(array $list): self
     {
         $this->_hardopt('ssl_cipher_list', implode(':', $list));
         return $this;
@@ -267,12 +276,12 @@ class ObjCurl
     /**
      * Set SSL client certificate
      *
-     * @param  string $file Filename of certificate
-     * @param  string $type Type of certifcate (pem, der, ...)
-     * @param  string $pass Passphrase if certificate is encrypted
+     * @param string $file Filename of certificate
+     * @param string $type Type of certifcate (pem, der, ...)
+     * @param ?string $pass Passphrase if certificate is encrypted
      * @return self
      */
-    public function certificate(string $file, string $type = 'pem', string $pass = null)
+    public function certificate(string $file, string $type = 'pem', string $pass = null): self
     {
         $this->_hardopt('sslcert', $file);
         $this->_hardopt('sslcerttype', strtoupper($type));
@@ -283,12 +292,12 @@ class ObjCurl
     /**
      * Set SSL private key
      *
-     * @param  string $file Filename of private key
-     * @param  string $type Type of private key (pem, der, ...)
-     * @param  string $pass Passphrase if private key is encrypted
+     * @param string $file Filename of private key
+     * @param string $type Type of private key (pem, der, ...)
+     * @param ?string $pass Passphrase if private key is encrypted
      * @return self
      */
-    public function privateKey(string $file, string $type = 'pem', string $pass = null)
+    public function privateKey(string $file, string $type = 'pem', string $pass = null): self
     {
         $this->_hardopt('sslkey', $file);
         $this->_hardopt('sslkeytype', strtoupper($type));
@@ -299,10 +308,11 @@ class ObjCurl
     /**
      * Set URL
      *
-     * @param  string $url Uniform Resource Location
+     * @param string $url Uniform Resource Location
      * @return self
+     * @throws Uri\InvalidUriException
      */
-    public function url(string $url)
+    public function url(string $url): self
     {
         $this->url = Uri\parse($url);
 
@@ -319,7 +329,7 @@ class ObjCurl
      * @return self
      * @throws Throwable
      */
-    public function secure()
+    public function secure(): self
     {
         $this->_require('ssl', 'SSL is not supported by cURL');
         $this->url['scheme'] = 'https';
@@ -331,7 +341,7 @@ class ObjCurl
      *
      * @return self
      */
-    public function insecure()
+    public function insecure(): self
     {
         $this->url['scheme'] = 'http';
         return $this;
@@ -342,10 +352,10 @@ class ObjCurl
      *
      * This is the @user part before the hostname of an URI
      *
-     * @param  string $user
+     * @param string $user
      * @return self
      */
-    public function user(string $user)
+    public function user(string $user): self
     {
         $this->url['user'] = $user;
         return $this;
@@ -354,10 +364,10 @@ class ObjCurl
     /**
      * Set host-part of URI
      *
-     * @param  string $host
+     * @param string $host
      * @return self
      */
-    public function host(string $host)
+    public function host(string $host): self
     {
         $this->url['host'] = idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46);
         return $this;
@@ -366,10 +376,10 @@ class ObjCurl
     /**
      * Set port of URI
      *
-     * @param  int $port
+     * @param int $port
      * @return self
      */
-    public function port(int $port)
+    public function port(int $port): self
     {
         $this->url['port'] = $port;
         return $this;
@@ -378,10 +388,10 @@ class ObjCurl
     /**
      * Set path of URI
      *
-     * @param  string $path
+     * @param string $path
      * @return self
      */
-    public function path(string $path)
+    public function path(string $path): self
     {
         $this->url['path'] = $path;
         return $this;
@@ -393,7 +403,7 @@ class ObjCurl
      * @param string $fragment
      * @return self
      */
-    public function fragment(string $fragment)
+    public function fragment(string $fragment): self
     {
         $this->url['fragment'] = $fragment;
         return $this;
@@ -404,10 +414,10 @@ class ObjCurl
      *
      * If supported by cURL, fractional seconds are allowed. Otherwise the value will be truncated and interpreted as an integer
      *
-     * @param  float $seconds
+     * @param float $seconds
      * @return self
      */
-    public function timeout(float $seconds)
+    public function timeout(float $seconds): self
     {
         if ($this->_hasopt('timeout_ms')) {
             $this->_softopt('timeout_ms', intval($seconds * 1000));
@@ -420,11 +430,11 @@ class ObjCurl
     /**
      * Set a single header field
      *
-     * @param  string $key   Name of header field
-     * @param  string $value Value of header field
+     * @param string $key Name of header field
+     * @param ?string $value Value of header field
      * @return self
      */
-    public function header(string $key, string $value = null)
+    public function header(string $key, string $value = null): self
     {
         $key = strtolower($key);
         if (is_null($value)) {
@@ -438,12 +448,12 @@ class ObjCurl
     /**
      * Set multiple header fields
      *
+     * @param string[] $headers
+     * @return self
      * @see ObjCurl::header()
      *
-     * @param  string[] $headers
-     * @return self
      */
-    public function headers(array $headers)
+    public function headers(array $headers): self
     {
         foreach ($headers as $key => $value) {
             $this->header($key, $value);
@@ -454,10 +464,10 @@ class ObjCurl
     /**
      * Set Accept-header field
      *
-     * @param  string $contentType
+     * @param string $contentType
      * @return self
      */
-    public function accept(string $contentType)
+    public function accept(string $contentType): self
     {
         $this->header('Accept', $contentType);
         return $this;
@@ -466,10 +476,10 @@ class ObjCurl
     /**
      * Set Content-Type-header field
      *
-     * @param  string $contentType
+     * @param string $contentType
      * @return self
      */
-    public function contentType(string $contentType)
+    public function contentType(string $contentType): self
     {
         $this->header('Content-Type', $contentType);
         return $this;
@@ -478,11 +488,11 @@ class ObjCurl
     /**
      * Set URL query param field
      *
-     * @param  string $key
-     * @param  string $value
+     * @param string $key
+     * @param ?string $value
      * @return self
      */
-    public function query(string $key, string $value = null)
+    public function query(string $key, string $value = null): self
     {
         if (!Str::ok($value)) {
             unset($this->query[$key]);
@@ -499,7 +509,7 @@ class ObjCurl
      * @param string[] $params
      * @return self
      */
-    public function queries(array $params)
+    public function queries(array $params): self
     {
         foreach ($params as $key => $value) {
             $this->query($key, $value);
@@ -510,11 +520,11 @@ class ObjCurl
     /**
      * Set HTTP basic authentication
      *
-     * @param  string $username
-     * @param  string $password
+     * @param string $username
+     * @param ?string $password
      * @return self
      */
-    public function basicAuth(string $username, string $password = null)
+    public function basicAuth(string $username, string $password = null): self
     {
         $this->basic_auth_user = $username;
         $this->basic_auth_pass = $password;
@@ -524,10 +534,10 @@ class ObjCurl
     /**
      * Set raw payload data
      *
-     * @param  array|object|string $data If not a string, the payload will be transformed by http_build_query()
+     * @param array|object|string $data If not a string, the payload will be transformed by http_build_query()
      * @return self
      */
-    public function payload($data)
+    public function payload($data): self
     {
         if (is_array($data) || is_object($data)) {
             $data = http_build_query($data);
@@ -539,12 +549,12 @@ class ObjCurl
     /**
      * Encode payload as JSON and set Accept- and Content-Type-headers accordingly
      *
-     * @param  array|object $data
-     * @param  string       $contentType
+     * @param mixed $data
+     * @param string $contentType
      * @throw  \Wrap\JSON\EncodeException
      * @return self
      */
-    public function json($data = null, string $contentType = 'application/json')
+    public function json($data = null, string $contentType = 'application/json'): self
     {
         if (!is_null($data)) {
             $json = JSON::encode($data);
@@ -558,11 +568,11 @@ class ObjCurl
     /**
      * Encode paylod as XML and set Accept- and Content-Type-headers accordingly
      *
-     * @param  DOMDocument $doc XML DOM
-     * @param  string      $contentType
+     * @param ?DOMDocument $doc XML DOM
+     * @param string $contentType
      * @return self
      */
-    public function xml(DOMDocument $doc = null, string $contentType = 'application/xml')
+    public function xml(DOMDocument $doc = null, string $contentType = 'application/xml'): self
     {
         if (!is_null($doc)) {
             $xml = (string) $doc->saveXML();
@@ -576,10 +586,10 @@ class ObjCurl
     /**
      * Encode payload as application/x-www-form-urlencoded
      *
-     * @param  string[] $data
+     * @param string[] $data
      * @return self
      */
-    public function form(array $data)
+    public function form(array $data): self
     {
         $this->payload($data);
         return $this;
@@ -588,10 +598,10 @@ class ObjCurl
     /**
      * Encode payload as multipart/form-data
      *
-     * @param  string[] $data
+     * @param string[] $data
      * @return self
      */
-    public function multiform(array $data)
+    public function multiform(array $data): self
     {
         $this->payload = (array) $data;
         return $this;
@@ -600,10 +610,10 @@ class ObjCurl
     /**
      * Set referer
      *
-     * @param  string $referer
+     * @param string $referer
      * @return self
      */
-    public function referer(string $referer)
+    public function referer(string $referer): self
     {
         $this->referer = $referer;
         return $this;
@@ -612,11 +622,11 @@ class ObjCurl
     /**
      * Set a single cookie
      *
-     * @param  string $key
-     * @param  string $value
+     * @param string $key
+     * @param string $value
      * @return self
      */
-    public function cookie(string $key, string $value)
+    public function cookie(string $key, string $value): self
     {
         $this->cookies[$key] = $value;
         return $this;
@@ -625,11 +635,11 @@ class ObjCurl
     /**
      * Set multiple cookies at once
      *
-     * @see    ObjCurl::cookie()
-     * @param  string[] $cookies
+     * @param string[] $cookies
      * @return self
+     * @see    ObjCurl::cookie()
      */
-    public function cookies(array $cookies)
+    public function cookies(array $cookies): self
     {
         foreach ($cookies as $K => $V) {
             $this->cookie($K, $V);
@@ -640,9 +650,9 @@ class ObjCurl
     /**
      * Submit request with HEAD method
      *
-     * @return ObjCurl\Response
+     * @return Response
      */
-    public function head()
+    public function head(): Response
     {
         $this->method = 'HEAD';
         return $this->_exec();
@@ -651,9 +661,9 @@ class ObjCurl
     /**
      * Submit request with GET method
      *
-     * @return ObjCurl\Response
+     * @return Response
      */
-    public function get()
+    public function get(): Response
     {
         $this->method = 'GET';
         return $this->_exec();
@@ -662,9 +672,9 @@ class ObjCurl
     /**
      * Submit request with POST method
      *
-     * @return ObjCurl\Response
+     * @return Response
      */
-    public function post()
+    public function post(): Response
     {
         $this->method = 'POST';
         return $this->_exec();
@@ -673,9 +683,9 @@ class ObjCurl
     /**
      * Submit request with PUT method
      *
-     * @return ObjCurl\Response
+     * @return Response
      */
-    public function put()
+    public function put(): Response
     {
         $this->method = 'PUT';
         return $this->_exec();
@@ -684,9 +694,9 @@ class ObjCurl
     /**
      * Submit request with DELETE method
      *
-     * @return ObjCurl\Response
+     * @return Response
      */
-    public function delete()
+    public function delete(): Response
     {
         $this->method = 'DELETE';
         return $this->_exec();
@@ -695,7 +705,7 @@ class ObjCurl
     /**
      * Submit request with PATCH method
      *
-     * @return ObjCurl\Response
+     * @return Response
      */
     public function patch()
     {
@@ -703,22 +713,10 @@ class ObjCurl
         return $this->_exec();
     }
 
-    /**
-     * Get unique ID of request
-     *
-     * @return string UUID
-     */
-    public function id()
-    {
-        return $this->ID;
-    }
-
-    protected function _exec()
+    protected function _exec(): Response
     {
         $T = [];
         $T[0] = microtime(true);
-
-        $this->ID = Str::uuidV4();
 
         $url = Uri\build($this->url);
 
@@ -781,15 +779,15 @@ class ObjCurl
         return $this->_finish($curl, $T);
     }
 
-    protected function _finish($curl, array $T)
+    protected function _finish($curl, array $T): Response
     {
         $payload = curl_exec($curl);
 
         $T['exec'] = microtime(true);
 
-        $curl_error_code        = curl_errno($curl);
-        $curl_error_message     = curl_error($curl);
-        $curl_getinfo           = curl_getinfo($curl);
+        $curl_error_code = curl_errno($curl);
+        $curl_error_message = curl_error($curl);
+        $curl_getinfo = curl_getinfo($curl) ?? [];
 
         curl_close($curl);
 
@@ -801,15 +799,15 @@ class ObjCurl
         if (count($list) < 2) {
             $list[1] = null;
         }
-        list($header, $payload) = $list;
+        [$header, $payload] = $list;
         while (Str::match($header, '/^http\/\d+\.\d+\s+100/i')) {
             $list = explode("\r\n\r\n", $payload, 2);
             if (count($list) < 2) {
                 $list[1] = null;
             }
-            list($header, $payload) = $list;
+            [$header, $payload] = $list;
         }
-        list($status_line, $header) = explode("\r\n", $header, 2);
+        [$status_line, $header] = explode("\r\n", $header, 2);
 
         $headers = iconv_mime_decode_headers($header, ICONV_MIME_DECODE_CONTINUE_ON_ERROR);
 
@@ -825,6 +823,6 @@ class ObjCurl
         $curl_getinfo['times'] = $T;
         $curl_getinfo['status_line'] = $status_line;
 
-        return new ObjCurl\Response($this, $curl_getinfo, $headers, $payload);
+        return new Response($this, $curl_getinfo, $headers, $payload);
     }
 }

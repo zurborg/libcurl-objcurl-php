@@ -2,19 +2,24 @@
 /**
  * Object-orientated cURL class for PHP
  *
- * @copyright 2016 David Zurborg
+ * @copyright 2021 David Zurborg
  * @author    David Zurborg <zurborg@cpan.org>
  * @link      https://github.com/zurborg/libcurl-objcurl-php
  * @license   https://opensource.org/licenses/MIT The MIT License
  */
+
 namespace Curl\ObjCurl;
 
+use Curl;
+use Curl\ObjCurl;
+use DOMDocument;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Sabre\Uri;
+use Sabre\Uri\InvalidUriException;
 use Wrap\JSON;
-use DOMDocument;
 
 /**
  * ObjCurl respsonse class
@@ -25,24 +30,28 @@ class Response
     const EOL = "\r\n";
 
     /** @internal */
-    const SP  = ' ';
+    const SP = ' ';
 
     /** @internal */
     const COL = ':';
 
-    use HelperTrait;
+    protected ObjCurl $objcurl;
+    protected array $getinfo = [];
+    protected array $headers = [];
+    protected ?string $payload;
+    protected array $mime_type = [];
+    protected string $ID;
 
-    protected $objcurl;
-    protected $getinfo = [];
-    protected $headers = [];
-    protected $payload;
-    protected $mime_type = [];
-    protected $ID;
-
-    /** @internal */
-    public function __construct(\Curl\ObjCurl $objcurl, array $getinfo, array $headers, string $payload = null)
+    /**
+     * @param ObjCurl $objcurl
+     * @param array $getinfo
+     * @param array $headers
+     * @param string|null $payload
+     * @internal
+     */
+    public function __construct(ObjCurl $objcurl, array $getinfo, array $headers, string $payload = null)
     {
-        $this->ID = $objcurl->id();
+        $this->ID = Str::uuidV4();
         $this->objcurl = $objcurl;
         $this->getinfo = $getinfo;
         $this->headers = $headers;
@@ -99,7 +108,7 @@ class Response
      * $response->status(1) === 2; // status code is 2xx
      * ```
      *
-     * @param  int $digits Number of digits to return
+     * @param int $digits Number of digits to return
      * @return int
      */
     public function status(int $digits = 3)
@@ -116,7 +125,7 @@ class Response
      * $response->is(4);   // matches 4xx (400..499)
      * ```
      *
-     * @param  int  $code HTTP status code (1, 2 or 3 digits)
+     * @param int $code HTTP status code (1, 2 or 3 digits)
      * @return bool
      */
     public function is(int $code)
@@ -127,8 +136,8 @@ class Response
     /**
      * cURL getinfo
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
     public function info(string $key, $default = null)
@@ -167,8 +176,9 @@ class Response
     /**
      * Return request URI
      *
-     * @param string $part `scheme` or `host` or `path` or `port` or `user` or `query` or `fragment`
+     * @param ?string $part `scheme` or `host` or `path` or `port` or `user` or `query` or `fragment`
      * @return mixed array or scalar
+     * @throws InvalidUriException
      */
     public function url(string $part = null)
     {
@@ -183,8 +193,8 @@ class Response
     /**
      * HTTP response header
      *
-     * @param  string $key Name of header field
-     * @return string
+     * @param string $key Name of header field
+     * @return string|array
      */
     public function header(string $key)
     {
@@ -205,7 +215,7 @@ class Response
     /**
      * Top-level MIME type
      *
-     * @param  string $default
+     * @param ?string $default
      * @return string
      */
     public function mimeType(string $default = null)
@@ -216,7 +226,7 @@ class Response
     /**
      * MIME subtype
      *
-     * @param  string $default
+     * @param ?string $default
      * @return string
      */
     public function mimeSubType(string $default = null)
@@ -227,7 +237,7 @@ class Response
     /**
      * MIME subtree tree
      *
-     * @param  string $default
+     * @param ?string $default
      * @return string
      */
     public function mimeTree(string $default = null)
@@ -238,7 +248,7 @@ class Response
     /**
      * MIME suffix
      *
-     * @param  string $default
+     * @param ?string $default
      * @return string
      */
     public function mimeSuffix(string $default = null)
@@ -249,7 +259,7 @@ class Response
     /**
      * MIME parameters
      *
-     * @param  string $default
+     * @param ?string $default
      * @return string
      */
     public function mimeParams(string $default = null)
@@ -260,8 +270,8 @@ class Response
     /**
      * Condensed MIME content type
      *
-     * @param  string $type    Assert or return false
-     * @param  string $subtype Assert or return false
+     * @param ?string $type Assert or return false
+     * @param ?string $subtype Assert or return false
      * @return string
      */
     public function contentType(string $type = null, string $subtype = null)
@@ -280,9 +290,9 @@ class Response
     /**
      * Decode JSON payload
      *
-     * @param  bool $assoc convert objects to associative arrays
+     * @param bool $assoc convert objects to associative arrays
      * @throw  \Wrap\JSON\DecodeException
-     * @return mixed|stdClass
+     * @return mixed
      */
     public function decodeJSON(bool $assoc = false)
     {
@@ -314,14 +324,14 @@ class Response
      *
      * Currently only JSON is supported.
      *
-     * @param  string $default_type
+     * @param ?string $default_type
      * @return mixed
      */
     public function decode(string $default_type = null)
     {
         $type = $this->contentType() ?? $default_type;
         if (!$type) {
-            throw new \RuntimeException("No content type in response header found");
+            throw new RuntimeException("No content type in response header found");
         }
 
         switch (true) {
@@ -332,7 +342,7 @@ class Response
                 return $this->decodeXML();
         }
 
-        throw new \RuntimeException("Unknown content type in response header: $type");
+        throw new RuntimeException("Unknown content type in response header: $type");
     }
 
     /**
@@ -347,7 +357,7 @@ class Response
             $msg .= $key . self::COL . self::SP . $val . self::EOL;
         }
         $msg .= self::EOL;
-        return $msg.$this->payload;
+        return $msg . $this->payload;
     }
 
     /**
@@ -355,7 +365,7 @@ class Response
      *
      * @param string $reason a well-picked reason why we should throw an exception
      * @param int $code
-     * @throws \Curl|ObjCurl|Exception
+     * @throws Exception
      */
     public function raise(string $reason, int $code = 0)
     {
@@ -372,7 +382,7 @@ class Response
      * @param array $context
      * @return void
      */
-    public function complain(LoggerInterface $logger, int $min_level = 3, array $context = [])
+    public function complain(LoggerInterface $logger, int $min_level = 3, array $context = []): void
     {
         $http_code = Arr::get($this->getinfo, 'http_code', 0);
 
@@ -387,7 +397,6 @@ class Response
             $message .= "\nRedirect to $redirect";
         }
 
-        $level = 0;
         switch (intval(substr($http_code, 0, 1))) {
             case 2:
                 $level = 'info';
@@ -410,7 +419,5 @@ class Response
         Arr::init($context, 'url', $url);
 
         $logger->log($level, $message, $context);
-
-        return;
     }
 }

@@ -2,14 +2,15 @@
 /**
  * Object-orientated cURL class for PHP
  *
- * @copyright 2016 David Zurborg
+ * @copyright 2021 David Zurborg
  * @author    David Zurborg <zurborg@cpan.org>
  * @link      https://github.com/zurborg/libcurl-objcurl-php
  * @license   https://opensource.org/licenses/MIT The MIT License
  */
+
 namespace Curl;
 
-use Sabre\Uri;
+use Curl\ObjCurl\Response;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 
@@ -58,8 +59,9 @@ class ObjCurlRest extends ObjCurl
      * Performs a POST request
      *
      * @param string[] $params URI and query parameters
+     * @return Response
      */
-    public function create(array $params = [])
+    public function create(array $params = []): Response
     {
         $this->params($params);
         return parent::post();
@@ -71,8 +73,9 @@ class ObjCurlRest extends ObjCurl
      * Performs a GET request
      *
      * @param string[] $params URI and query parameters
+     * @return Response
      */
-    public function read(array $params = [])
+    public function read(array $params = []): Response
     {
         $this->params($params);
         return parent::get();
@@ -84,8 +87,9 @@ class ObjCurlRest extends ObjCurl
      * Performs a PUT request
      *
      * @param string[] $params URI and query parameters
+     * @return Response
      */
-    public function update(array $params = [])
+    public function update(array $params = []): Response
     {
         $this->params($params);
         return parent::put();
@@ -97,8 +101,9 @@ class ObjCurlRest extends ObjCurl
      * Performs a DELETE request
      *
      * @param string[] $params URI and query parameters
+     * @return Response
      */
-    public function delete(array $params = [])
+    public function delete(array $params = []): Response
     {
         $this->params($params);
         return parent::delete();
@@ -110,6 +115,7 @@ class ObjCurlRest extends ObjCurl
      * Performs a PATCH request
      *
      * @param string[] $params URI and query parameters
+     * @return Response
      */
     public function patch(array $params = [])
     {
