@@ -95,40 +95,6 @@ class Response
 
         $this->cookies = [];
 
-        $cookie_re = '
-            \s*
-            (?<name> \S+ )
-            \s*
-            =
-            \s*
-            (?<value>
-                ([0-9a-z+]|%[0-9a-f]{2})+
-            )
-            \s*
-            ;?
-
-            (
-                \s*
-                expires
-                \s*
-                =
-                (?<expires> .+? )
-                \s*
-                ;?
-            )?
-
-            (
-                \s*
-                expires
-                \s*
-                =
-                (?<expires> .+? )
-                \s*
-                ;?
-            )?
-            \s*
-        ';
-
         foreach ($raw_cookies as $raw_cookie) {
             $opts = [];
             $parts = explode(';', $raw_cookie);
@@ -239,7 +205,7 @@ class Response
      */
     public function times()
     {
-        $times = $this->getinfo['times'];
+        $times = Arr::get($this->getinfo, 'times') ?? [0];
         $T0 = $times[0];
         $diffs = [];
         foreach ($times as $key => $time) {

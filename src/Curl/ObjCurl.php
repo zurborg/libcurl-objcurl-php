@@ -89,15 +89,15 @@ class ObjCurl
         $this->timeout(self::DEFAULT_TIMEOUT);
         $this->_init(
             [
-                'header' => true,
+                'header'         => true,
                 'returntransfer' => true,
-                'useragent' => self::USER_AGENT,
-                'encoding' => '',
-                'autoreferer' => true,
-                'crlf' => true,
+                'useragent'      => self::USER_AGENT,
+                'encoding'       => '',
+                'autoreferer'    => true,
+                'crlf'           => true,
                 'followlocation' => false,
-                'pipewait' => true,
-                'safe_upload' => true,
+                'pipewait'       => true,
+                'safe_upload'    => true,
             ]
         );
         return $this;
