@@ -768,4 +768,10 @@ class ObjCurlTest extends TestCase
             $resp->cookie('foo', true)
         );
     }
+
+    public function test025()
+    {
+        $resp = ObjCurl::mockResponse('http://example.com/');
+        $this->assertSame('http://example.com/', $resp->info('url'));
+    }
 }

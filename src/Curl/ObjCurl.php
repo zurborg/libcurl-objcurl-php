@@ -80,6 +80,43 @@ class ObjCurl
     }
 
     /**
+     * Generate a fake response, bypassing response data directly
+     *
+     * This do not make an actual HTTP call and can be used in mock contexts
+     *
+     * @param int $code
+     * @param array $headers
+     * @param string|null $payload
+     * @return Response
+     */
+    public function fakeResponse(int $code = 200, array $headers = [], string $payload = null): Response
+    {
+        $getinfo = [
+            'url'         => Uri\build($this->url),
+            'status_line' => sprintf('HTTP/1.0 %3d', $code),
+        ];
+
+        return new Response($this, $getinfo, $headers, $payload);
+    }
+
+    /**
+     * Generate a fake response from scratch
+     *
+     * @param string $url
+     * @param int $code
+     * @param array $headers
+     * @param string|null $payload
+     * @return Response
+     * @throws Exception
+     * @see ObjCurl::fakeResponse()
+     */
+    public static function mockResponse(string $url, int $code = 200, array $headers = [], string $payload = null): Response
+    {
+        $objcurl = new self($url);
+        return $objcurl->fakeResponse($code, $headers, $payload);
+    }
+
+    /**
      * Reset every cURL-specific option except URL
      *
      * @return self
