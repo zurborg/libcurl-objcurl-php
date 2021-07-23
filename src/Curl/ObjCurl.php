@@ -94,6 +94,7 @@ class ObjCurl
         $getinfo = [
             'url'         => Uri\build($this->url),
             'status_line' => sprintf('HTTP/1.0 %3d', $code),
+            'http_code'   => $code,
         ];
 
         return new Response($this, $getinfo, $headers, $payload);

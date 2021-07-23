@@ -771,7 +771,8 @@ class ObjCurlTest extends TestCase
 
     public function test025()
     {
-        $resp = ObjCurl::mockResponse('http://example.com/');
+        $resp = ObjCurl::mockResponse('http://example.com/', 418);
         $this->assertSame('http://example.com/', $resp->info('url'));
+        $this->assertSame(418, $resp->status());
     }
 }
