@@ -43,7 +43,7 @@ class ObjCurlTest extends TestCase
     {
         $url = getenv('TEST_URL');
         if (!$url) {
-            $url = 'http://localhost';
+            $this->markTestSkipped('Set TEST_URL for extended tests');
         }
         $curl = new ObjCurlDump($url);
         $curl->path('/echo.php');
