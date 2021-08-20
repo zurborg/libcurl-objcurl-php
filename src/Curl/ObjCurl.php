@@ -65,7 +65,7 @@ class ObjCurl
     /**
      * Instanciates a new object
      *
-     * @param string $url An URL to connect to
+     * @param string $url A URL to connect to
      * @throws Exception
      */
     public function __construct(string $url = 'http://localhost/')
@@ -82,7 +82,7 @@ class ObjCurl
     /**
      * Generate a fake response, bypassing response data directly
      *
-     * This do not make an actual HTTP call and can be used in mock contexts
+     * This does not make an actual HTTP call and can be used in mock contexts
      *
      * @param int $code
      * @param array $headers
@@ -218,7 +218,7 @@ class ObjCurl
 
     protected function _can(string $feature)
     {
-        return Arr::get(self::$features, $feature, null);
+        return Arr::get(self::$features, $feature);
     }
 
     /**
@@ -388,7 +388,7 @@ class ObjCurl
     /**
      * Set user-part of URI
      *
-     * This is the @user part before the hostname of an URI
+     * This is the @user part before the hostname of a URI
      *
      * @param string $user
      * @return self
@@ -450,7 +450,7 @@ class ObjCurl
     /**
      * Set timeout in seconds
      *
-     * If supported by cURL, fractional seconds are allowed. Otherwise the value will be truncated and interpreted as an integer
+     * If supported by cURL, fractional seconds are allowed, otherwise the value will be truncated and interpreted as an integer
      *
      * @param float $seconds
      * @return self
@@ -585,7 +585,7 @@ class ObjCurl
     }
 
     /**
-     * Encode payload as JSON and set Accept- and Content-Type-headers accordingly
+     * Encode payload as JSON and set `Accept`- and `Content-Type`-headers accordingly
      *
      * @param mixed $data
      * @param string $contentType
@@ -604,7 +604,7 @@ class ObjCurl
     }
 
     /**
-     * Encode paylod as XML and set Accept- and Content-Type-headers accordingly
+     * Encode paylod as XML and set `Accept`- and `Content-Type`-headers accordingly
      *
      * @param ?DOMDocument $doc XML DOM
      * @param string $contentType

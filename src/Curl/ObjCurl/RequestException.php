@@ -3,7 +3,6 @@
 namespace Curl\ObjCurl;
 
 use RuntimeException;
-use Throwable;
 use function curl_strerror;
 
 /**

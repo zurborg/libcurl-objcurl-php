@@ -14,6 +14,7 @@ use Curl;
 use Curl\ObjCurl;
 use DateTimeImmutable;
 use DOMDocument;
+use Exception;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 use Psr\Log\LoggerInterface;
@@ -62,6 +63,7 @@ class Response
         $type = strtolower(trim($this->header('Content-Type')));
         if ($match = Str::match(
             $type,
+            /** @lang pcre */
             '/^
                 (?<type>
                     [^\/]+?
@@ -128,7 +130,7 @@ class Response
             if ($expires = Arr::consume($opts, 'expires')) {
                 try {
                     $opts['expires'] = new DateTimeImmutable($expires);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $opts['expires'] = $e;
                 }
             }
@@ -163,7 +165,7 @@ class Response
     }
 
     /**
-     * Checks whether a HTTP status code matches
+     * Checks whether an HTTP status code matches
      *
      * ```php
      * $response->is(200); // matches only code 200
@@ -245,7 +247,7 @@ class Response
     public function header(string $key)
     {
         $key = strtolower($key);
-        return Arr::get($this->headers, $key, null);
+        return Arr::get($this->headers, $key);
     }
 
     /**
@@ -257,7 +259,7 @@ class Response
     public function headers(string $key): array
     {
         $key = strtolower($key);
-        $value = Arr::get($this->headers, $key, null);
+        $value = Arr::get($this->headers, $key);
         return is_array($value) ? $value : [$value];
     }
 
@@ -350,8 +352,8 @@ class Response
      * Decode JSON payload
      *
      * @param bool $assoc convert objects to associative arrays
-     * @throws DecodeException
      * @return mixed
+     * @throws DecodeException
      */
     public function decodeJSON(bool $assoc = false)
     {
@@ -474,7 +476,7 @@ class Response
         $url = Arr::get($this->getinfo, 'url');
         $message = "Request to $url returned $http_code";
 
-        if ($redirect = Arr::get($this->headers, 'location', null)) {
+        if ($redirect = Arr::get($this->headers, 'location')) {
             $message .= "\nRedirect to $redirect";
         }
 
