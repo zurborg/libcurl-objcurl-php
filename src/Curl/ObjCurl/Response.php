@@ -12,6 +12,7 @@ namespace Curl\ObjCurl;
 
 use Curl;
 use Curl\ObjCurl;
+use DateTimeImmutable;
 use DOMDocument;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
@@ -20,6 +21,7 @@ use RuntimeException;
 use Sabre\Uri;
 use Sabre\Uri\InvalidUriException;
 use Wrap\JSON;
+use Wrap\JSON\DecodeException;
 
 /**
  * ObjCurl respsonse class
@@ -124,7 +126,7 @@ class Response
 
             if ($expires = Arr::consume($opts, 'expires')) {
                 try {
-                    $opts['expires'] = new \DateTimeImmutable($expires);
+                    $opts['expires'] = new DateTimeImmutable($expires);
                 } catch (\Exception $e) {
                     $opts['expires'] = $e;
                 }
@@ -139,7 +141,7 @@ class Response
      *
      * @return string UUID
      */
-    public function id()
+    public function id(): string
     {
         return $this->ID;
     }
@@ -154,7 +156,7 @@ class Response
      * @param int $digits Number of digits to return
      * @return int
      */
-    public function status(int $digits = 3)
+    public function status(int $digits = 3): int
     {
         return intval(substr($this->info('http_code'), 0, $digits));
     }
@@ -171,7 +173,7 @@ class Response
      * @param int $code HTTP status code (1, 2 or 3 digits)
      * @return bool
      */
-    public function is(int $code)
+    public function is(int $code): bool
     {
         return $code === intval(substr($this->info('http_code'), 0, strlen((string) $code)));
     }
@@ -193,7 +195,7 @@ class Response
      *
      * @return array
      */
-    public function infos()
+    public function infos(): array
     {
         return $this->getinfo;
     }
@@ -203,7 +205,7 @@ class Response
      *
      * @return float[] execution time of some steps (init, setopt, exec, cleanup)
      */
-    public function times()
+    public function times(): array
     {
         $times = Arr::get($this->getinfo, 'times') ?? [0];
         $T0 = $times[0];
@@ -263,7 +265,7 @@ class Response
      *
      * @return string
      */
-    public function payload()
+    public function payload(): ?string
     {
         return $this->payload;
     }
@@ -274,7 +276,7 @@ class Response
      * @param ?string $default
      * @return string
      */
-    public function mimeType(string $default = null)
+    public function mimeType(string $default = null): string
     {
         return Arr::get($this->mime_type, 'type', $default);
     }
@@ -285,7 +287,7 @@ class Response
      * @param ?string $default
      * @return string
      */
-    public function mimeSubType(string $default = null)
+    public function mimeSubType(string $default = null): string
     {
         return Arr::get($this->mime_type, 'subtype', $default);
     }
@@ -296,7 +298,7 @@ class Response
      * @param ?string $default
      * @return string
      */
-    public function mimeTree(string $default = null)
+    public function mimeTree(string $default = null): string
     {
         return Arr::get($this->mime_type, 'tree', $default);
     }
@@ -307,7 +309,7 @@ class Response
      * @param ?string $default
      * @return string
      */
-    public function mimeSuffix(string $default = null)
+    public function mimeSuffix(string $default = null): string
     {
         return Arr::get($this->mime_type, 'suffix', $default);
     }
@@ -318,7 +320,7 @@ class Response
      * @param ?string $default
      * @return string
      */
-    public function mimeParams(string $default = null)
+    public function mimeParams(string $default = null): string
     {
         return Arr::get($this->mime_type, 'params', $default);
     }
@@ -347,18 +349,12 @@ class Response
      * Decode JSON payload
      *
      * @param bool $assoc convert objects to associative arrays
-     * @throw  \Wrap\JSON\DecodeException
+     * @throws DecodeException
      * @return mixed
      */
     public function decodeJSON(bool $assoc = false)
     {
-        $json = $this->payload;
-
-        if ($assoc) {
-            return (array) JSON::decodeArray($json);
-        } else {
-            return (object) JSON::decodeObject($json);
-        }
+        return $assoc ? JSON::decodeArray($this->payload) : JSON::decodeObject($this->payload);
     }
 
     /**
@@ -368,7 +364,7 @@ class Response
      *
      * @return DOMDocument
      */
-    public function decodeXML(int $options = 0)
+    public function decodeXML(int $options = 0): DOMDocument
     {
         $doc = new DOMDocument();
         $doc->loadXML($this->payload, $options);
@@ -378,7 +374,7 @@ class Response
     /**
      * Decode payload (generic method with auto-detection)
      *
-     * Currently only JSON is supported.
+     * Currently, only JSON is supported.
      *
      * @param ?string $default_type
      * @return mixed

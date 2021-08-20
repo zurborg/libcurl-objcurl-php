@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class ObjCurlRestDump extends ObjCurlRest
 {
-    public function __url(array $params)
+    public function __url(array $params): string
     {
         $this->params($params);
         return Uri\build($this->url);

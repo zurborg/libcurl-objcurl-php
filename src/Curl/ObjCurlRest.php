@@ -34,9 +34,9 @@ class ObjCurlRest extends ObjCurl
      *
      * @param string[] $params Path parameters
      *
-     * @return self
+     * @return static
      */
-    public function params(array $params)
+    public function params(array $params): self
     {
         $path = $this->url['path'];
         Str::replace(
@@ -117,7 +117,7 @@ class ObjCurlRest extends ObjCurl
      * @param string[] $params URI and query parameters
      * @return Response
      */
-    public function patch(array $params = [])
+    public function patch(array $params = []): Response
     {
         $this->params($params);
         return parent::patch();

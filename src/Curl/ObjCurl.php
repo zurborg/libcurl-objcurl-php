@@ -745,7 +745,7 @@ class ObjCurl
      *
      * @return Response
      */
-    public function patch()
+    public function patch(): Response
     {
         $this->method = 'PATCH';
         return $this->_exec();

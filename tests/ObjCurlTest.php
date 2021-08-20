@@ -7,17 +7,17 @@ use Wrap\JSON;
 
 class ObjCurlDump extends ObjCurl
 {
-    public function __url()
+    public function __url(): array
     {
         return $this->url;
     }
 
-    public function __options()
+    public function __options(): array
     {
         return $this->options;
     }
 
-    public function __headers()
+    public function __headers(): array
     {
         return $this->headers;
     }
@@ -39,7 +39,7 @@ class ObjCurlTest extends TestCase
      * @return ObjCurlDump
      * @throws Throwable
      */
-    private function curl()
+    private function curl(): ObjCurlDump
     {
         $url = getenv('TEST_URL');
         if (!$url) {
@@ -333,7 +333,7 @@ class ObjCurlTest extends TestCase
     {
         $curl = new ObjCurlDump();
         $O = $curl->__options();
-        $this->arrsert($O, 'useragent', ObjCurlDump::USER_AGENT);
+        $this->arrsert($O, 'useragent', ObjCurl::USER_AGENT);
     }
 
     public function test004()
@@ -700,9 +700,9 @@ class ObjCurlTest extends TestCase
         $data = $resp->decodeJSON(true);
         $this->assertIsArray($data);
         $data = $resp->decodeJSON(false);
-        $this->assertInstanceOf(\stdClass::class, $data);
+        $this->assertInstanceOf(stdClass::class, $data);
         $data = $resp->decode();
-        $this->assertInstanceOf(\stdClass::class, $data);
+        $this->assertInstanceOf(stdClass::class, $data);
     }
 
     /**
@@ -726,7 +726,6 @@ class ObjCurlTest extends TestCase
     {
         $curl = $this->curl();
         $curl->path('/cookie.php');
-        $T0 = DateTimeImmutable::createFromFormat('U', 0);
         $T1 = DateTimeImmutable::createFromFormat('U', 1);
         $TN = DateTimeImmutable::createFromFormat('U', 0x10000);
         $curl->cookie('foo', JSON::encode([123, $TN->format('U'), '/path', 'abc.xyz', true, true]));
@@ -769,6 +768,9 @@ class ObjCurlTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     */
     public function test025()
     {
         $resp = ObjCurl::mockResponse('http://example.com/', 418);
