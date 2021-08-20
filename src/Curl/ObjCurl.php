@@ -824,13 +824,12 @@ class ObjCurl
         $T['exec'] = microtime(true);
 
         $curl_error_code = curl_errno($curl);
-        $curl_error_message = curl_error($curl);
         $curl_getinfo = curl_getinfo($curl) ?? [];
 
         curl_close($curl);
 
         if ($curl_error_code !== 0) {
-            throw new ObjCurl\Exception($curl_error_message, $curl_error_code);
+            throw ObjCurl\RequestException::fromCurlErrorCode($curl_error_code);
         }
 
         $list = explode("\r\n\r\n", $payload, 2);

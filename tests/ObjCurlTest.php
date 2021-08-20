@@ -1,6 +1,8 @@
 <?php
 
 use Curl\ObjCurl;
+use Curl\ObjCurl\RequestException;
+use Curl\ObjCurl\ResponseException;
 use PHPUnit\Framework\TestCase;
 use Pirate\Hooray\Arr;
 use Wrap\JSON;
@@ -639,11 +641,12 @@ class ObjCurlTest extends TestCase
      */
     public function test018()
     {
-        $this->expectException(\Curl\ObjCurl\Exception::class);
-        $this->expectExceptionCode(6);
-        $this->expectExceptionMessageMatches("/could.+resolve.+host.+nonexistent\.nodomain/i");
         $curl = $this->curl();
         $curl->host('nonexistent.nodomain');
+
+        $this->expectException(RequestException::class);
+        $this->expectExceptionCode(6);
+        $this->expectExceptionMessageMatches("/could.+resolve.+host/i");
         $curl->get();
     }
 
@@ -652,11 +655,12 @@ class ObjCurlTest extends TestCase
      */
     public function test019()
     {
-        $this->expectExceptionMessage("meh");
-        $this->expectException(\Curl\ObjCurl\Exception::class);
-        $this->expectExceptionCode(123);
         $curl = $this->curl();
         $resp = $curl->get();
+
+        $this->expectExceptionMessage("meh");
+        $this->expectException(ResponseException::class);
+        $this->expectExceptionCode(123);
         $resp->raise('meh', 123);
     }
 

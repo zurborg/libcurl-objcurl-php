@@ -394,7 +394,7 @@ class Response
                 return $this->decodeXML();
         }
 
-        throw new RuntimeException("Unknown content type in response header: $type");
+        throw new RuntimeException("Unsupported content type: $type");
     }
 
     /**
@@ -443,17 +443,15 @@ class Response
     }
 
     /**
-     * Throws this response as an runtime exception
+     * Throws this response as a runtime exception
      *
      * @param string $reason a well-picked reason why we should throw an exception
      * @param int $code
-     * @throws Exception
+     * @throws RequestException
      */
     public function raise(string $reason, int $code = 0)
     {
-        $e = new Exception($reason, $code);
-        $e->Response = $this;
-        throw $e;
+        throw new ResponseException($this, $reason, $code);
     }
 
     /**
