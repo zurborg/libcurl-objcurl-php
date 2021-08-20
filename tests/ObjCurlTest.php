@@ -781,4 +781,16 @@ class ObjCurlTest extends TestCase
         $this->assertSame('http://example.com/', $resp->info('url'));
         $this->assertSame(418, $resp->status());
     }
+
+    /**
+     * @throws Throwable
+     */
+    public function test026()
+    {
+        $curl = $this->curl();
+        $curl->path('/header.php');
+        $curl->query('Content-Encoding', 'utf-8');
+        $resp = $curl->get();
+        $this->assertSame('utf-8', $resp->header('Content-Encoding'));
+    }
 }
