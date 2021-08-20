@@ -1,8 +1,10 @@
 vendor/
 *.orig
 .*
-*~
+!.git*
+!.docker*
 *.err
 *.out
 composer.lock
 composer.phar
+*~
