@@ -7,14 +7,15 @@
  * @link      https://github.com/zurborg/libcurl-objcurl-php
  * @license   https://opensource.org/licenses/MIT The MIT License
  */
+
 namespace Curl;
 
 use DOMDocument;
 use Exception;
 use InvalidArgumentException;
-use Sabre\Uri;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
+use Sabre\Uri;
 use Sabre\Uri\InvalidUriException;
 use Throwable;
 use Wrap\JSON;
@@ -29,9 +30,10 @@ class ObjCurl
 
     const DEFAULT_TIMEOUT = 30;
 
-    const MIN_CURL_VERSION = 65536 *   7 // major
-                           +   256 *  22 // minor
-                           +     1 *   0 // patch
+    const MIN_CURL_VERSION
+        = 65536 *  7 // major
+        +   256 * 22 // minor
+        +     1 *  0 // patch
     ;
 
     const FEATURES = [
@@ -71,9 +73,9 @@ class ObjCurl
     public function __construct(string $url = 'http://localhost/')
     {
         if (!self::$initialized) {
-             self::_initialize();
+            self::_initialize();
         }
- 
+
         $this->url($url);
 
         $this->reset();
@@ -88,17 +90,19 @@ class ObjCurl
     {
         $this->ID = Str::uuidV4();
         $this->timeout(self::DEFAULT_TIMEOUT);
-        $this->_init([
-            'header'          => true,
-            'returntransfer'  => true,
-            'useragent'       => self::USER_AGENT,
-            'encoding'        => '',
-            'autoreferer'     => true,
-            'crlf'            => true,
-            'followlocation'  => false,
-            'pipewait'        => true,
-            'safe_upload'     => true,
-        ]);
+        $this->_init(
+            [
+                'header'         => true,
+                'returntransfer' => true,
+                'useragent'      => self::USER_AGENT,
+                'encoding'       => '',
+                'autoreferer'    => true,
+                'crlf'           => true,
+                'followlocation' => false,
+                'pipewait'       => true,
+                'safe_upload'    => true,
+            ]
+        );
         return $this;
     }
 
@@ -123,9 +127,9 @@ class ObjCurl
 
         self::$features = [];
         foreach (self::FEATURES as $feature) {
-            $constant = 'CURL_VERSION_'.strtoupper($feature);
+            $constant = 'CURL_VERSION_' . strtoupper($feature);
             if ($featuremap & constant($constant)) {
-                self::$features[$feature] = Arr::get(self::$version, $feature.'_version', true);
+                self::$features[$feature] = Arr::get(self::$version, $feature . '_version', true);
             } else {
                 self::$features[$feature] = false;
             }
@@ -149,7 +153,7 @@ class ObjCurl
     public static function version(string $param = 'version', $default = null)
     {
         if (!self::$initialized) {
-             self::_initialize();
+            self::_initialize();
         }
         return Arr::get(self::$version, $param, $default);
     }
@@ -165,7 +169,7 @@ class ObjCurl
     public static function features(): array
     {
         if (!self::$initialized) {
-             self::_initialize();
+            self::_initialize();
         }
         return self::$features;
     }
@@ -239,8 +243,8 @@ class ObjCurl
      * String options:
      * + `cipher_list` (but see also `ciphers` method below)
      *
-     * @param  string $key Name
-     * @param  mixed  $val Value
+     * @param string $key Name
+     * @param mixed $val Value
      * @return self
      */
     public function sslopt(string $key, $val): self
@@ -256,7 +260,7 @@ class ObjCurl
      * $objcurl->ciphers(['RSA+AES', 'ECDHE+AES'])
      * ```
      *
-     * @param  string[] $list List of ciphers
+     * @param string[] $list List of ciphers
      * @return self
      */
     public function ciphers(array $list): self
@@ -344,7 +348,7 @@ class ObjCurl
      *
      * This is the @user part before the hostname of an URI
      *
-     * @param  string $user
+     * @param string $user
      * @return self
      */
     public function user(string $user): self
@@ -356,7 +360,7 @@ class ObjCurl
     /**
      * Set host-part of URI
      *
-     * @param  string $host
+     * @param string $host
      * @return self
      */
     public function host(string $host): self
@@ -368,7 +372,7 @@ class ObjCurl
     /**
      * Set port of URI
      *
-     * @param  int $port
+     * @param int $port
      * @return self
      */
     public function port(int $port): self
@@ -380,7 +384,7 @@ class ObjCurl
     /**
      * Set path of URI
      *
-     * @param  string $path
+     * @param string $path
      * @return self
      */
     public function path(string $path): self
@@ -406,7 +410,7 @@ class ObjCurl
      *
      * If supported by cURL, fractional seconds are allowed. Otherwise the value will be truncated and interpreted as an integer
      *
-     * @param  float $seconds
+     * @param float $seconds
      * @return self
      */
     public function timeout(float $seconds): self
@@ -440,10 +444,10 @@ class ObjCurl
     /**
      * Set multiple header fields
      *
+     * @param string[] $headers
+     * @return self
      * @see ObjCurl::header()
      *
-     * @param  string[] $headers
-     * @return self
      */
     public function headers(array $headers): self
     {
@@ -456,7 +460,7 @@ class ObjCurl
     /**
      * Set Accept-header field
      *
-     * @param  string $contentType
+     * @param string $contentType
      * @return self
      */
     public function accept(string $contentType): self
@@ -468,7 +472,7 @@ class ObjCurl
     /**
      * Set Content-Type-header field
      *
-     * @param  string $contentType
+     * @param string $contentType
      * @return self
      */
     public function contentType(string $contentType): self
@@ -526,7 +530,7 @@ class ObjCurl
     /**
      * Set raw payload data
      *
-     * @param  array|object|string $data If not a string, the payload will be transformed by http_build_query()
+     * @param array|object|string $data If not a string, the payload will be transformed by http_build_query()
      * @return self
      */
     public function payload($data): self
@@ -541,8 +545,8 @@ class ObjCurl
     /**
      * Encode payload as JSON and set Accept- and Content-Type-headers accordingly
      *
-     * @param  array|object $data
-     * @param  string       $contentType
+     * @param array|object $data
+     * @param string $contentType
      * @throw  \Wrap\JSON\EncodeException
      * @return self
      */
@@ -578,7 +582,7 @@ class ObjCurl
     /**
      * Encode payload as application/x-www-form-urlencoded
      *
-     * @param  string[] $data
+     * @param string[] $data
      * @return self
      */
     public function form(array $data): self
@@ -590,7 +594,7 @@ class ObjCurl
     /**
      * Encode payload as multipart/form-data
      *
-     * @param  string[] $data
+     * @param string[] $data
      * @return self
      */
     public function multiform(array $data): self
@@ -602,7 +606,7 @@ class ObjCurl
     /**
      * Set referer
      *
-     * @param  string $referer
+     * @param string $referer
      * @return self
      */
     public function referer(string $referer): self
@@ -614,8 +618,8 @@ class ObjCurl
     /**
      * Set a single cookie
      *
-     * @param  string $key
-     * @param  string $value
+     * @param string $key
+     * @param string $value
      * @return self
      */
     public function cookie(string $key, string $value): self
@@ -627,9 +631,9 @@ class ObjCurl
     /**
      * Set multiple cookies at once
      *
-     * @see    ObjCurl::cookie()
-     * @param  string[] $cookies
+     * @param string[] $cookies
      * @return self
+     * @see    ObjCurl::cookie()
      */
     public function cookies(array $cookies): self
     {
@@ -787,9 +791,9 @@ class ObjCurl
 
         $T['exec'] = microtime(true);
 
-        $curl_error_code        = curl_errno($curl);
-        $curl_error_message     = curl_error($curl);
-        $curl_getinfo           = curl_getinfo($curl);
+        $curl_error_code = curl_errno($curl);
+        $curl_error_message = curl_error($curl);
+        $curl_getinfo = curl_getinfo($curl);
 
         curl_close($curl);
 

@@ -6,12 +6,11 @@
 
 namespace Curl\ObjCurl;
 
-use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 
 /**
  * @internal
-*/
+ */
 trait HelperTrait
 {
     private static function decodeKey(string $key): string
@@ -48,7 +47,7 @@ trait HelperTrait
             $key,
             '/^-(.)/s',
             function ($val) {
-                return 'X'.strtoupper($val[1]);
+                return 'X' . strtoupper($val[1]);
             },
             1
         );

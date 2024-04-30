@@ -7,9 +7,11 @@
  * @link      https://github.com/zurborg/libcurl-objcurl-php
  * @license   https://opensource.org/licenses/MIT The MIT License
  */
+
 namespace Curl\ObjCurl;
 
 use Curl\ObjCurl;
+use DOMDocument;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 use Psr\Log\LoggerInterface;
@@ -17,7 +19,6 @@ use RuntimeException;
 use Sabre\Uri;
 use Sabre\Uri\InvalidUriException;
 use Wrap\JSON;
-use DOMDocument;
 
 /**
  * ObjCurl respsonse class
@@ -28,7 +29,7 @@ class Response
     const EOL = "\r\n";
 
     /** @internal */
-    const SP  = ' ';
+    const SP = ' ';
 
     /** @internal */
     const COL = ':';
@@ -102,7 +103,7 @@ class Response
      * $response->status(1) === 2; // status code is 2xx
      * ```
      *
-     * @param  int $digits Number of digits to return
+     * @param int $digits Number of digits to return
      * @return int
      */
     public function status(int $digits = 3): int
@@ -119,7 +120,7 @@ class Response
      * $response->is(4);   // matches 4xx (400..499)
      * ```
      *
-     * @param  int  $code HTTP status code (1, 2 or 3 digits)
+     * @param int $code HTTP status code (1, 2 or 3 digits)
      * @return bool
      */
     public function is(int $code): bool
@@ -130,8 +131,8 @@ class Response
     /**
      * cURL getinfo
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
     public function info(string $key, $default = null)
@@ -187,7 +188,7 @@ class Response
     /**
      * HTTP response header
      *
-     * @param  string $key Name of header field
+     * @param string $key Name of header field
      * @return string|array|null
      */
     public function header(string $key)
@@ -284,7 +285,7 @@ class Response
     /**
      * Decode JSON payload
      *
-     * @param  bool $assoc convert objects to associative arrays
+     * @param bool $assoc convert objects to associative arrays
      * @throw  \Wrap\JSON\DecodeException
      * @return array|object
      */
@@ -357,7 +358,7 @@ class Response
             }
         }
         $msg .= self::EOL;
-        return $msg.$this->payload;
+        return $msg . $this->payload;
     }
 
     /**

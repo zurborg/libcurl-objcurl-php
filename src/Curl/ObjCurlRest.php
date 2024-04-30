@@ -7,6 +7,7 @@
  * @link      https://github.com/zurborg/libcurl-objcurl-php
  * @license   https://opensource.org/licenses/MIT The MIT License
  */
+
 namespace Curl;
 
 use Pirate\Hooray\Arr;
