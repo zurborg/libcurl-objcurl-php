@@ -14,8 +14,9 @@ authors:
     homepage: https://zurborg.github.io/
 
 require:
-  php: '~7'
+  php: '~7.4'
   ext-curl: '*'
+  ext-dom: '*'
   ext-intl: '*'
   ext-iconv: '*'
   ext-openssl: '*'

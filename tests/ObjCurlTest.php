@@ -23,15 +23,16 @@ class ObjCurlDump extends ObjCurl {
 
 class ObjCurlTest extends PHPUnit_Framework_TestCase
 {
-    private function arrsert(array $array, $key, $val) {
-        return $this->assertSame($val, Arr::get($array, $key));
+    private function arrsert(array $array, $key, $val): void
+    {
+        $this->assertSame($val, Arr::get($array, $key));
     }
 
     private function curl()
     {
         $url = getenv('TEST_URL');
         if (!$url) {
-            $url = 'http://localhost';
+            $this->markTestSkipped("No TEST_URL given");
         }
         $curl = new ObjCurlDump($url);
         $curl->path('/echo.php');
@@ -322,8 +323,9 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
 
     }
 
-    private function assertPath(array $array, $path, $value) {
-        return $this->assertSame($value, Arr::getPath($array, $path), $path);
+    private function assertPath(array $array, $path, $value): void
+    {
+        $this->assertSame($value, Arr::getPath($array, $path), $path);
     }
 
     public function test007get() {
@@ -480,7 +482,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Curl\ObjCurl\Exception
+     * @expectedException \Curl\ObjCurl\Exception
      * @expectedExceptionCode 6
      * @expectedExceptionMessageRegExp /could.+resolve.+host.+nonexistent\.nodomain/i
      */
@@ -491,7 +493,7 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Curl\ObjCurl\Exception
+     * @expectedException \Curl\ObjCurl\Exception
      * @expectedExceptionCode 123
      * @expectedExceptionMessage meh
      */

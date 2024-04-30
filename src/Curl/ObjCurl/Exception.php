@@ -2,16 +2,18 @@
 
 namespace Curl\ObjCurl;
 
+use RuntimeException;
+
 /**
  * Class Exception
  * @package Curl\ObjCurl
  */
-class Exception extends \RuntimeException
+class Exception extends RuntimeException
 {
-    public $Response;
+    public Response $Response;
 
-    public static function basic(int $code)
+    public static function basic(int $code): self
     {
-        return new self(\curl_strerror($code), $code);
+        return new self(curl_strerror($code), $code);
     }
 }

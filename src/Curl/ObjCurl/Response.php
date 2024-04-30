@@ -9,10 +9,13 @@
  */
 namespace Curl\ObjCurl;
 
+use Curl\ObjCurl;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Sabre\Uri;
+use Sabre\Uri\InvalidUriException;
 use Wrap\JSON;
 use DOMDocument;
 
@@ -32,15 +35,15 @@ class Response
 
     use HelperTrait;
 
-    protected $objcurl;
-    protected $getinfo = [];
-    protected $headers = [];
-    protected $payload;
-    protected $mime_type = [];
-    protected $ID;
+    protected ObjCurl $objcurl;
+    protected array $getinfo = [];
+    protected array $headers = [];
+    protected string $payload;
+    protected array $mime_type = [];
+    protected string $ID;
 
     /** @internal */
-    public function __construct(\Curl\ObjCurl $objcurl, array $getinfo, array $headers, string $payload = null)
+    public function __construct(ObjCurl $objcurl, array $getinfo, array $headers, string $payload = null)
     {
         $this->ID = $objcurl->id();
         $this->objcurl = $objcurl;
@@ -57,10 +60,10 @@ class Response
                 \/
                 (?<subtype>
                     (?:
-                        (?<tree> [^\.]+ )
+                        (?<tree> [^.]+ )
                         \.
                     )?
-                    [^\+]+
+                    [^+]+
                 )
                 (?:
                     \+
@@ -87,7 +90,7 @@ class Response
      *
      * @return string UUID
      */
-    public function id()
+    public function id(): string
     {
         return $this->ID;
     }
@@ -102,7 +105,7 @@ class Response
      * @param  int $digits Number of digits to return
      * @return int
      */
-    public function status(int $digits = 3)
+    public function status(int $digits = 3): int
     {
         return intval(substr($this->info('http_code'), 0, $digits));
     }
@@ -119,7 +122,7 @@ class Response
      * @param  int  $code HTTP status code (1, 2 or 3 digits)
      * @return bool
      */
-    public function is(int $code)
+    public function is(int $code): bool
     {
         return $code === intval(substr($this->info('http_code'), 0, strlen((string) $code)));
     }
@@ -141,7 +144,7 @@ class Response
      *
      * @return array
      */
-    public function infos()
+    public function infos(): array
     {
         return $this->getinfo;
     }
@@ -151,7 +154,7 @@ class Response
      *
      * @return float[] execution time of some steps (init, setopt, exec, cleanup)
      */
-    public function times()
+    public function times(): array
     {
         $times = $this->getinfo['times'];
         $T0 = $times[0];
@@ -167,8 +170,9 @@ class Response
     /**
      * Return request URI
      *
-     * @param string $part `scheme` or `host` or `path` or `port` or `user` or `query` or `fragment`
+     * @param string|null $part `scheme` or `host` or `path` or `port` or `user` or `query` or `fragment`
      * @return mixed array or scalar
+     * @throws InvalidUriException
      */
     public function url(string $part = null)
     {
@@ -184,12 +188,12 @@ class Response
      * HTTP response header
      *
      * @param  string $key Name of header field
-     * @return string
+     * @return string|null
      */
-    public function header(string $key)
+    public function header(string $key): ?string
     {
         $key = strtolower($key);
-        return Arr::get($this->headers, $key, null);
+        return Arr::get($this->headers, $key);
     }
 
     /**
@@ -197,7 +201,7 @@ class Response
      *
      * @return string
      */
-    public function payload()
+    public function payload(): string
     {
         return $this->payload;
     }
@@ -205,10 +209,10 @@ class Response
     /**
      * Top-level MIME type
      *
-     * @param  string $default
-     * @return string
+     * @param string|null $default
+     * @return string|null
      */
-    public function mimeType(string $default = null)
+    public function mimeType(string $default = null): ?string
     {
         return Arr::get($this->mime_type, 'type', $default);
     }
@@ -216,10 +220,10 @@ class Response
     /**
      * MIME subtype
      *
-     * @param  string $default
-     * @return string
+     * @param string|null $default
+     * @return string|null
      */
-    public function mimeSubType(string $default = null)
+    public function mimeSubType(string $default = null): ?string
     {
         return Arr::get($this->mime_type, 'subtype', $default);
     }
@@ -227,10 +231,10 @@ class Response
     /**
      * MIME subtree tree
      *
-     * @param  string $default
-     * @return string
+     * @param string|null $default
+     * @return string|null
      */
-    public function mimeTree(string $default = null)
+    public function mimeTree(string $default = null): ?string
     {
         return Arr::get($this->mime_type, 'tree', $default);
     }
@@ -238,10 +242,10 @@ class Response
     /**
      * MIME suffix
      *
-     * @param  string $default
-     * @return string
+     * @param string|null $default
+     * @return string|null
      */
-    public function mimeSuffix(string $default = null)
+    public function mimeSuffix(string $default = null): ?string
     {
         return Arr::get($this->mime_type, 'suffix', $default);
     }
@@ -249,10 +253,10 @@ class Response
     /**
      * MIME parameters
      *
-     * @param  string $default
-     * @return string
+     * @param string|null $default
+     * @return string|null
      */
-    public function mimeParams(string $default = null)
+    public function mimeParams(string $default = null): ?string
     {
         return Arr::get($this->mime_type, 'params', $default);
     }
@@ -260,18 +264,18 @@ class Response
     /**
      * Condensed MIME content type
      *
-     * @param  string $type    Assert or return false
-     * @param  string $subtype Assert or return false
-     * @return string
+     * @param string|null $type Assert or return false
+     * @param string|null $subtype Assert or return false
+     * @return string|null
      */
-    public function contentType(string $type = null, string $subtype = null)
+    public function contentType(string $type = null, string $subtype = null): ?string
     {
         if (!is_null($type) and $this->mimeType() !== $type) {
-            return false;
+            return null;
         }
 
         if (!is_null($subtype) and $this->mimeSubType() !== $subtype) {
-            return false;
+            return null;
         }
 
         return $this->mimeType() . '/' . $this->mimeSubType();
@@ -282,7 +286,7 @@ class Response
      *
      * @param  bool $assoc convert objects to associative arrays
      * @throw  \Wrap\JSON\DecodeException
-     * @return mixed|stdClass
+     * @return array|object
      */
     public function decodeJSON(bool $assoc = false)
     {
@@ -302,7 +306,7 @@ class Response
      *
      * @return DOMDocument
      */
-    public function decodeXML(int $options = 0)
+    public function decodeXML(int $options = 0): DOMDocument
     {
         $doc = new DOMDocument();
         $doc->loadXML($this->payload, $options);
@@ -314,14 +318,14 @@ class Response
      *
      * Currently only JSON is supported.
      *
-     * @param  string $default_type
-     * @return mixed
+     * @param string|null $default_type
+     * @return array|DOMDocument|object
      */
     public function decode(string $default_type = null)
     {
         $type = $this->contentType() ?? $default_type;
         if (!$type) {
-            throw new \RuntimeException("No content type in response header found");
+            throw new RuntimeException("No content type in response header found");
         }
 
         switch (true) {
@@ -332,7 +336,7 @@ class Response
                 return $this->decodeXML();
         }
 
-        throw new \RuntimeException("Unknown content type in response header: $type");
+        throw new RuntimeException("Unknown content type in response header: $type");
     }
 
     /**
@@ -355,7 +359,7 @@ class Response
      *
      * @param string $reason a well-picked reason why we should throw an exception
      * @param int $code
-     * @throws \Curl|ObjCurl|Exception
+     * @throws Exception
      */
     public function raise(string $reason, int $code = 0)
     {
@@ -372,7 +376,7 @@ class Response
      * @param array $context
      * @return void
      */
-    public function complain(LoggerInterface $logger, int $min_level = 3, array $context = [])
+    public function complain(LoggerInterface $logger, int $min_level = 3, array $context = []): void
     {
         $http_code = Arr::get($this->getinfo, 'http_code', 0);
 
@@ -383,11 +387,10 @@ class Response
         $url = Arr::get($this->getinfo, 'url');
         $message = "Request to $url returned $http_code";
 
-        if ($redirect = Arr::get($this->headers, 'location', null)) {
+        if ($redirect = Arr::get($this->headers, 'location')) {
             $message .= "\nRedirect to $redirect";
         }
 
-        $level = 0;
         switch (intval(substr($http_code, 0, 1))) {
             case 2:
                 $level = 'info';
@@ -410,7 +413,5 @@ class Response
         Arr::init($context, 'url', $url);
 
         $logger->log($level, $message, $context);
-
-        return;
     }
 }

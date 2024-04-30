@@ -9,7 +9,6 @@
  */
 namespace Curl;
 
-use Sabre\Uri;
 use Pirate\Hooray\Arr;
 use Pirate\Hooray\Str;
 
@@ -35,7 +34,7 @@ class ObjCurlRest extends ObjCurl
      *
      * @return self
      */
-    public function params(array $params)
+    public function params(array $params): self
     {
         $path = $this->url['path'];
         Str::replace(
@@ -59,7 +58,7 @@ class ObjCurlRest extends ObjCurl
      *
      * @param string[] $params URI and query parameters
      */
-    public function create(array $params = [])
+    public function create(array $params = []): ObjCurl\Response
     {
         $this->params($params);
         return parent::post();
@@ -72,7 +71,7 @@ class ObjCurlRest extends ObjCurl
      *
      * @param string[] $params URI and query parameters
      */
-    public function read(array $params = [])
+    public function read(array $params = []): ObjCurl\Response
     {
         $this->params($params);
         return parent::get();
@@ -85,7 +84,7 @@ class ObjCurlRest extends ObjCurl
      *
      * @param string[] $params URI and query parameters
      */
-    public function update(array $params = [])
+    public function update(array $params = []): ObjCurl\Response
     {
         $this->params($params);
         return parent::put();
@@ -98,7 +97,7 @@ class ObjCurlRest extends ObjCurl
      *
      * @param string[] $params URI and query parameters
      */
-    public function delete(array $params = [])
+    public function delete(array $params = []): ObjCurl\Response
     {
         $this->params($params);
         return parent::delete();
@@ -111,7 +110,7 @@ class ObjCurlRest extends ObjCurl
      *
      * @param string[] $params URI and query parameters
      */
-    public function patch(array $params = [])
+    public function patch(array $params = []): ObjCurl\Response
     {
         $this->params($params);
         return parent::patch();
