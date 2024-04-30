@@ -453,9 +453,9 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $this->assertSame('foo=bar', $resp->mimeParams());
         $this->assertSame('major/tree.minor', $resp->contentType());
         $this->assertSame('major/tree.minor', $resp->contentType('major'));
-        $this->assertSame(false, $resp->contentType('bad'));
+        $this->assertSame(null, $resp->contentType('bad'));
         $this->assertSame('major/tree.minor', $resp->contentType('major', 'tree.minor'));
-        $this->assertSame(false, $resp->contentType('major', 'bad'));
+        $this->assertSame(null, $resp->contentType('major', 'bad'));
     }
 
     public function test016() {
