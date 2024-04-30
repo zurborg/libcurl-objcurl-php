@@ -188,9 +188,9 @@ class Response
      * HTTP response header
      *
      * @param  string $key Name of header field
-     * @return string|null
+     * @return string|array|null
      */
-    public function header(string $key): ?string
+    public function header(string $key)
     {
         $key = strtolower($key);
         return Arr::get($this->headers, $key);
@@ -348,7 +348,13 @@ class Response
     {
         $msg = '';
         foreach ($this->headers as $key => $val) {
-            $msg .= $key . self::COL . self::SP . $val . self::EOL;
+            if (is_array($val)) {
+                foreach ($val as $v) {
+                    $msg .= $key . self::COL . self::SP . $v . self::EOL;
+                }
+            } else {
+                $msg .= $key . self::COL . self::SP . $val . self::EOL;
+            }
         }
         $msg .= self::EOL;
         return $msg.$this->payload;

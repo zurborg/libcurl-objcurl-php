@@ -547,4 +547,13 @@ class ObjCurlTest extends PHPUnit_Framework_TestCase
         $data = $resp->decode();
         $this->assertInstanceOf(\DOMDocument::class, $data);
     }
+
+    public function test024()
+    {
+        $curl = $this->curl();
+        $curl->path('/header.php');
+        $resp = $curl->get();
+        $this->assertSame('123', $resp->header('X-Foo'));
+        $this->assertSame(['456', '789'], $resp->header('X-Bar'));
+    }
 }
